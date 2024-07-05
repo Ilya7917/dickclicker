@@ -1,0 +1,73 @@
+{
+  "name": "vue-tg",
+  "version": "0.2.0",
+  "description": "Telegram integration for Vue",
+  "author": "deptyped <deptyped@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/deptyped/vue-telegram#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deptyped/vue-telegram.git"
+  },
+  "bugs": "https://github.com/deptyped/vue-telegram/issues",
+  "keywords": [
+    "vue3",
+    "composable",
+    "telegram",
+    "vite"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    },
+    "./*": "./*"
+  },
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:demo": "vite build --config demo/vite.config.ts",
+    "deploy:demo": "npm run build:demo",
+    "preview": "vite preview",
+    "lint": "eslint \"**/*.{vue,ts,js}\"",
+    "fix": "eslint --fix \"**/*.{vue,ts,js}\"",
+    "release": "npm run build && npm pack",
+    "test": "vitest",
+    "typecheck": "vue-tsc --noEmit",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "vue": "^3"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "0.43.1",
+    "@types/node": "^20.8.3",
+    "@types/telegram-web-app": "^6.9.1",
+    "@vitejs/plugin-vue": "4.4.0",
+    "@vue/test-utils": "2.4.1",
+    "eslint": "8.51.0",
+    "happy-dom": "12.9.0",
+    "markdown-table": "^3.0.3",
+    "rimraf": "5.0.5",
+    "typedoc": "^0.25.2",
+    "typedoc-plugin-markdown": "^3.16.0",
+    "typescript": "5.2.2",
+    "vite": "4.4.11",
+    "vite-plugin-dts": "3.6.0",
+    "vitepress": "1.0.0-rc.34",
+    "vitest": "0.34.6",
+    "vue-component-meta": "^1.8.18"
+  }
+}
