@@ -12,8 +12,8 @@ const userStore = useUserStore()
 
 useWebAppViewport().expand()
 useWebAppClosingConfirmation().enableClosingConfirmation()
-useWebAppTheme().headerColor.value = "#007a23";
-useWebAppTheme().backgroundColor.value = "#007a23";
+useWebAppTheme().headerColor.value = "#ff72e3";
+useWebAppTheme().backgroundColor.value = "#ff72e3";
 
 useWebAppBackButton().onBackButtonClicked(() => {
   router.push("/")
@@ -36,8 +36,11 @@ const farmerPopupClose = () => {
 onMounted(() => {
   const { locale } = useI18n();
   console.log(import.meta.env.VITE_API_HOST);
+  userStore.testRequest();
   userStore.login(useWebApp().initData).then(user => {
+    console.log(user)
     if (!user) {
+      isUserLoggedIn.value = false
       return
     }
     locale.value = user.language_code;
@@ -65,7 +68,7 @@ watchEffect(() => {
 })
 
 const isUserLoggedIn = ref(false);
-
+console.log(isUserLoggedIn);
 </script>
 
 <template>

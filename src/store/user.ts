@@ -93,6 +93,10 @@ export const useUserStore = defineStore('user', {
             }
             return this.user
         },
+        async testRequest(){
+            const response = await axios.get(`${import.meta.env.VITE_API_HOST}/health`);
+            console.log(response);
+        },
         mineCoins() {
             if (this.user && this.user.energy >= this.user.mine_level) {
                 var mul = 1

@@ -183,7 +183,7 @@ const claimDailyBooster = () => {
             <div class="icon-box">👆</div>
             <div class="text-container">
                 <div>{{ $t("boosts.multitap.name") }}<span class="badge">{{ userStore.boosts?.current_mine_level }} {{ $t("boosts.level") }}</span></div>
-                <div class="price">🪙 {{ userStore.boosts?.mine_level_price.toLocaleString() }}</div>
+                <div class="price">🍆 {{ userStore.boosts?.mine_level_price.toLocaleString() }}</div>
             </div>
         </div>
         <div class="boost" @click="showPurchasePopup('energy')">
@@ -195,7 +195,7 @@ const claimDailyBooster = () => {
                         userStore.boosts?.current_energy_level }} {{ $t("boosts.level") }}</span>
                     <span v-else class="badge">{{ $t("boosts.maxLevelShort") }}</span>
                 </div>
-                <div v-if="(userStore.boosts?.current_energy_level ?? 0) < 4" class="price">🪙 {{
+                <div v-if="(userStore.boosts?.current_energy_level ?? 0) < 4" class="price">🍆 {{
                     userStore.boosts?.energy_level_price.toLocaleString() }}</div>
             </div>
         </div>
@@ -203,14 +203,14 @@ const claimDailyBooster = () => {
             <div class="icon-box">🔋</div>
             <div class="text-container">
                 <div>{{ $t("boosts.maxEnergy.name") }}<span class="badge">{{ (userStore.user?.max_energy_level ?? 0) + 1 }} {{ $t("boosts.level") }}</span></div>
-                <div class="price">🪙 {{ userStore.boosts?.max_energy_price.toLocaleString() }}</div>
+                <div class="price">🍆 {{ userStore.boosts?.max_energy_price.toLocaleString() }}</div>
             </div>
         </div>
         <div class="boost daily-boost" @click="showPurchasePopup('auto_farmer')">
             <div class="icon-box">👨‍🌾</div>
             <div class="text-container">
                 <div>{{ $t("boosts.autoFarmer.name") }}</div>
-                <div v-if="!(userStore.user?.auto_farmer ?? false)" class="price">🪙 {{
+                <div v-if="!(userStore.user?.auto_farmer ?? false)" class="price">🍆 {{
                     userStore.boosts?.auto_farmer_price.toLocaleString() }}</div>
                 <div v-else>✅ Enabled</div>
             </div>
@@ -240,14 +240,14 @@ const claimDailyBooster = () => {
             <div v-if="!lootboxContent.isOpen" class="popup-body">
                 <p>{{ selectedBoost.description }}</p>
                 <p v-for="spec in selectedBoost.nextLevelSpec" class="boost-desc-hint">{{ spec }}</p>
-                <p v-if="selectedBoost.price != 0">🪙{{ selectedBoost.price.toLocaleString() }}<span v-if="selectedBoost.next_level != 0" class="price-hint">/ {{
+                <p v-if="selectedBoost.price != 0">🍆{{ selectedBoost.price.toLocaleString() }}<span v-if="selectedBoost.next_level != 0" class="price-hint">/ {{
                     selectedBoost.next_level }}
                         level</span></p>
                 <button class="boost-purchase-button" @click="purchaseBoost">{{ selectedBoost.action }}</button>
             </div>
             <div v-else class="lootbox-items">
                 <p class="lootbox-item">Your gift:</p>
-                <p v-if="lootboxContent.coin > 0">🪙 +{{ lootboxContent.coin }}</p>
+                <p v-if="lootboxContent.coin > 0">🍆 +{{ lootboxContent.coin }}</p>
                 <p v-if="lootboxContent.energy > 0">⚡️ +{{ lootboxContent.energy }}</p>
                 <button style="margin-top:10px" class="boost-purchase-button" @click="claimDailyBooster">Claim</button>
             </div>

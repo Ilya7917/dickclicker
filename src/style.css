@@ -16,12 +16,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   /* Змінюємо лінійний градієнт на радіальний */
-  background-color: #70b63c;
+  background-color: #ff72e3;
   background-size: cover;
   background-position: center;
   /*background-blend-mode: soft-light;*/
   background-size: cover;
-  background-image: radial-gradient(circle, #b9ff842b 0%, #08b353d6 60%, #008947 85%, #007a23 100%), url('./assets/images/rays.png');
+  background-image: radial-gradient(circle, #b9ff842b 0%, #ff72e3 60%, #ff72e3 85%, #ff72e3 100%), url('./assets/images/rays.png');
   color: var(--tg-theme-text-color, rgb(255, 255, 255));
   overflow: auto;
   min-height: var(--tg-viewport-height);
@@ -53,10 +53,10 @@ main {
   flex-direction: column;
 }
 
-/* header {
+header {
   background: blue;
 }
-
+/*
 main {
   background: red;
 }

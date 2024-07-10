@@ -51,7 +51,7 @@ const setActiveTab = (tabName: string) => {
         <div class="player-info">
 <!--          <span class="name">You on {{ leaderboardStore.dailyLeaderboard?.me?.position }} place</span>-->
           <span class="name">{{ t("top.yourPlace", {"place": leaderboardStore.dailyLeaderboard?.me?.position}) }}</span>
-          <span class="player-score">🪙 +{{ leaderboardStore.dailyLeaderboard?.me?.score.toLocaleString() }}</span>
+          <span class="player-score">🍆 +{{ leaderboardStore.dailyLeaderboard?.me?.score.toLocaleString() }}</span>
         </div>
       </div>
       <div v-for="(player, index) in leaderboardStore.dailyLeaderboard?.players" :key="player.id" class="player">
@@ -63,7 +63,7 @@ const setActiveTab = (tabName: string) => {
         <div class="player-info">
           <span v-if="player.is_premium" class="name">{{ player.identity }}</span>
           <span v-else>{{ player.identity }}</span>
-          <span class="player-score">🪙 +{{ player.score.toLocaleString() }}</span>
+          <span class="player-score">🍆 +{{ player.score.toLocaleString() }}</span>
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@ const setActiveTab = (tabName: string) => {
         <div class="player-info">
 <!--          <span class="name">You on {{ leaderboardStore.monthlyLeaderboard?.me?.position }} place</span>-->
           <span class="name">{{ t("top.yourPlace", {"place": leaderboardStore.monthlyLeaderboard?.me?.position}) }}</span>
-          <span class="player-score">🪙 +{{ leaderboardStore.monthlyLeaderboard?.me?.score.toLocaleString() }}</span>
+          <span class="player-score">🍆 +{{ leaderboardStore.monthlyLeaderboard?.me?.score.toLocaleString() }}</span>
         </div>
       </div>
       <div v-for="(player, index) in leaderboardStore.monthlyLeaderboard?.players" :key="player.id" class="player">
@@ -95,7 +95,7 @@ const setActiveTab = (tabName: string) => {
         <div class="player-info">
           <span v-if="player.is_premium" class="name">{{ player.identity }}</span>
           <span v-else>{{ player.identity }}</span>
-          <span class="player-score">🪙 +{{ player.score.toLocaleString() }}</span>
+          <span class="player-score">🍆 +{{ player.score.toLocaleString() }}</span>
         </div>
       </div>
     </div>
@@ -115,7 +115,7 @@ const setActiveTab = (tabName: string) => {
         <div class="player-info">
 <!--          <span class="name">You on {{ leaderboardStore.leaderboard?.me?.position }} place</span>-->
           <span class="name">{{ t("top.yourPlace", {"place": leaderboardStore.leaderboard?.me?.position}) }}</span>
-          <span class="player-score">🪙 {{ user?.balance.toLocaleString() }}</span>
+          <span class="player-score">🍆 {{ user?.balance.toLocaleString() }}</span>
         </div>
       </div>
       <div v-for="(player, index) in leaderboardStore.leaderboard?.players" :key="player.id" class="player">
@@ -127,7 +127,7 @@ const setActiveTab = (tabName: string) => {
         <div class="player-info">
           <span v-if="player.is_premium" class="name">{{ player.identity }}</span>
           <span v-else>{{ player.identity }}</span>
-          <span class="player-score">🪙 {{ player.score.toLocaleString() }}</span>
+          <span class="player-score">🍆 {{ player.score.toLocaleString() }}</span>
         </div>
       </div>
     </div>
