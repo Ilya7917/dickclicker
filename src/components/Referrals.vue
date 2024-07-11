@@ -9,7 +9,7 @@ const user = userStore.user;
     <div class="referrals__screen">
         <div class="referrals__title">{{$t("referrals.title")}}</div>
         <div class="referrals__subtitle">{{$t("referrals.subtitle")}}</div>
-        <a v-if="user" :href="'https://t.me/share/url?url=https://t.me/weecoin_bot?start=r_' + user.id + '&text=' + $t(`referrals.message`) + ''" target="_blank" class="invite__button">{{$t("referrals.button")}}</a>
+        <a v-if="user" :href="'https://t.me/share/url?url=https://t.me/DickClickbot?start=r_' + user.id + '&text=' + $t(`referrals.message`) + ''" target="_blank" class="invite__button">{{$t("referrals.button")}}</a>
     </div>
 </template>
 

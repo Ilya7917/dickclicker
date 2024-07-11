@@ -136,9 +136,9 @@ const resetTilt = () => {
         <Balance />
         <!-- <League /> -->
         <div class="coin-container numbers-container" ref="numbersContainerRef">
-            <img v-if="userStore.user?.is_premium" src="@/assets/images/dick.svg" alt="Premium Coin" class="coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
+            <img v-if="userStore.user?.is_premium" src="@/assets/images/dick1.svg" alt="Premium Coin" class="coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
                 @mouseup="resetTilt" @mouseleave="resetTilt" @touchend="resetTilt" />
-            <img v-else src="@/assets/images/dick.svg" class="coin" alt="Regular Coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
+            <img v-else src="@/assets/images/dick1.svg" class="coin" alt="Regular Coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
                 @mouseup="resetTilt" @mouseleave="resetTilt" @touchend="resetTilt" />
         </div>
     </main>
