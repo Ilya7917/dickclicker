@@ -15,6 +15,7 @@ const messages = {
     bottomMenu: {
       top: "Top",
       earn: "Earn",
+      skins: "Skins",
       boosts: "Boosts",
       referrals: "Referrals"
     },

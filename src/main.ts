@@ -1,4 +1,4 @@
-import {createApp, Directive, DirectiveBinding} from 'vue'
+import { createApp, Directive, DirectiveBinding } from 'vue'
 import './style.css'
 import router from './plugins/router'
 import { createPinia } from 'pinia'

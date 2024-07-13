@@ -8,6 +8,9 @@ const routes = [
         path: '/leaderboard', name: 'leaderboard', component: () => import('@/components/Leaderboard.vue')
     },
     {
+        path: '/skins', name: 'skins', component: () => import('@/components/skins/SkinsStore.vue')
+    },
+    {
         path: '/boosts', name: 'boosts', component: () => import('@/components/boosts/BoostsIndex.vue')
     },
     {

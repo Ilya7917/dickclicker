@@ -24,6 +24,10 @@
         💰
         <span>{{ $t("bottomMenu.earn") }}</span>
       </router-link>
+      <router-link class="menu-item" to="/skins" tag="button">
+        🍆
+        <span>{{ $t("bottomMenu.skins") }}</span>
+      </router-link>
       <router-link class="menu-item" to="/referrals" tag="button">
         🧑‍🤝‍🧑
         <span>{{ $t("bottomMenu.referrals") }}</span>

@@ -4,8 +4,11 @@ import Balance from './account/Balance.vue';
 import { useWebAppHapticFeedback } from 'vue-tg'
 import BottomMenu from './BottomMenu.vue';
 import { useUserStore } from '@/store/user';
+import { skins } from './skins/skinBase';
 
 const userStore = useUserStore()
+
+const { getCurrentSkin } = userStore
 
 const coinRef = ref<HTMLElement | null>(null);
 const clickCount = ref(0);
@@ -129,6 +132,14 @@ const resetTilt = () => {
     }
 };
 
+const  getSkin = () => {
+    let index = skins.findIndex(e => e.id == getCurrentSkin)
+    console.log(`Index is : ${index}`)
+    return skins[index].skin;
+}
+
+
+
 </script>
 
 <template>
@@ -136,9 +147,9 @@ const resetTilt = () => {
         <Balance />
         <!-- <League /> -->
         <div class="coin-container numbers-container" ref="numbersContainerRef">
-            <img v-if="userStore.user?.is_premium" src="@/assets/images/dick1.svg" alt="Premium Coin" class="coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
+            <img v-if="userStore.user?.is_premium" :src="getSkin()" alt="Premium Coin" class="coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
                 @mouseup="resetTilt" @mouseleave="resetTilt" @touchend="resetTilt" />
-            <img v-else src="@/assets/images/dick1.svg" class="coin" alt="Regular Coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
+            <img v-else :src="getSkin()" class="coin" alt="Regular Coin" ref="coinRef" @mousedown="applyTilt" @touchstart="applyTilt"
                 @mouseup="resetTilt" @mouseleave="resetTilt" @touchend="resetTilt" />
         </div>
     </main>

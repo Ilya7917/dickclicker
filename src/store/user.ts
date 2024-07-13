@@ -20,6 +20,8 @@ export interface User {
     daily_booster_available_at: Date;
 };
 
+export let dickIcon = 0;
+
 export interface Boosts {
     current_mine_level: number;
     mine_level_price: number;
@@ -47,20 +49,86 @@ export interface MiningResult {
     newEnergy: number;
 }
 
+
+
 export const useUserStore = defineStore('user', {
     state: () => ({
         user: null as User | null,
-        boosts: null as Boosts | null
+        boosts: null as Boosts | null,
+        skin: 0 as number | null,
+        bg: "#ff72e3" as string | null
     }),
     getters: {
         getAccessToken: (state) => state.user?.access_token,
+        getCurrentSkin: (state) => state.skin,
+        getCurrentBg: (state) => state.bg
     },
     actions: {
+        setSkin(newSkin: number) {
+            this.skin = newSkin;
+        },
         setUser(user: User) {
             this.user = user
         },
         setBoosts(boosts: Boosts) {
             this.boosts = boosts
+        },
+        async getSkins()
+        {
+            if(!this.user) return;
+
+            const response = await axios.get(`${import.meta.env.VITE_API_HOST}/getSkins`, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            this.skin = response.data.current_skin;
+            return response.data.skins;
+        },
+        async updateUserCurrentSkin(id: number)
+        {
+            if (!this.user) {
+                return
+            }
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/setSkin`,
+                {
+                  skinId: id
+                },
+                {
+                  headers: {
+                    'x-api-key': this.user.access_token
+                  }
+                }
+            );
+            if(response.data.sucess)
+            {
+                this.skin = id;
+            }
+        },
+        async buyNewSkin(skinId: number)
+        {
+            if (!this.user) {
+                return
+            }
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/buySkin`,
+                {
+                  skinId: skinId
+                },
+                {
+                  headers: {
+                    'x-api-key': this.user.access_token
+                  }
+                }
+            );
+            if(response.data.sucess)
+            {
+                this.setUser(response.data.user)
+                return true;
+            }
+            return false;
+            
         },
         async login(initData: string) {
             const apiKey = import.meta.env.VITE_API_KEY

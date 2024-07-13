@@ -30,7 +30,7 @@ const openChannelLink = (channel: Channel) => {
           <span class="name">{{ channel.title }}</span>
         </div>
         <div class="channel-action">
-          <span v-if="channel.is_available" class="reward">🪙 {{ channel.reward.toLocaleString() }}</span>
+          <span v-if="channel.is_available" class="reward">🍆 {{ channel.reward.toLocaleString() }}</span>
           <span v-else class="reward">💠 {{ $t("earn.rewardReached") }}</span>
           <svg class="arrow">
             <use xlink:href="@/assets/images/sprite.svg#chevron-right"></use>
