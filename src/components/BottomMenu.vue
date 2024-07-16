@@ -32,6 +32,10 @@
         🧑‍🤝‍🧑
         <span>{{ $t("bottomMenu.referrals") }}</span>
       </router-link>
+      <router-link class="menu-item" to="/posts" tag="button">
+        🌐
+        <span>{{ $t("bottomMenu.posts") }}</span>
+      </router-link>
       <router-link class="menu-item" to="/boosts" tag="button">
         🚀
         <span>{{ $t("bottomMenu.boosts") }}</span>
@@ -134,7 +138,7 @@ const userStore = useUserStore()
   cursor: pointer;
   text-decoration: none;
   outline: none;
-  flex: 1 0 20%;
+  flex: 1 0 15%;
   font-size: 22px;
   overflow: hidden;
   text-align: center;

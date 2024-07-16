@@ -11,7 +11,7 @@ onMounted(() => {
 // channelsStore.fetchChannels();
 
 const openChannelLink = (channel: Channel) => {
-  channel.is_available = false
+  // channel.is_available = false
   wn.openTelegramLink(channel.invite_link)
 }
 </script>

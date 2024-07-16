@@ -1,3 +1,4 @@
+import { skins } from '@/components/skins/skinBase';
 import { createI18n } from 'vue-i18n';
 
 const messages = {
@@ -16,6 +17,7 @@ const messages = {
       top: "Top",
       earn: "Earn",
       skins: "Skins",
+      posts: "Posts",
       boosts: "Boosts",
       referrals: "Referrals"
     },
@@ -87,6 +89,8 @@ const messages = {
     bottomMenu: {
       top: "Статистика",
       earn: "Бонусы",
+      skins: "Скины",
+      posts: "Посты",
       boosts: "Бустеры",
       referrals: "Рефералы",
     },
