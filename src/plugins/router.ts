@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory} from 'vue-router'
+import { useWebAppPopup } from 'vue-tg'
 
 const routes = [
     {
@@ -9,6 +10,9 @@ const routes = [
     },
     {
         path: '/skins', name: 'skins', component: () => import('@/components/skins/SkinsStore.vue')
+    },
+    {
+        path: '/posts', name: 'skins', component: () => { useWebAppPopup().showAlert("👨‍💻 In developing")}
     },
     {
         path: '/boosts', name: 'boosts', component: () => import('@/components/boosts/BoostsIndex.vue')
