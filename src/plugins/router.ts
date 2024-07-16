@@ -12,9 +12,6 @@ const routes = [
         path: '/skins', name: 'skins', component: () => import('@/components/skins/SkinsStore.vue')
     },
     {
-        path: '/posts', name: 'skins', component: () => { useWebAppPopup().showAlert("👨‍💻 In developing")}
-    },
-    {
         path: '/boosts', name: 'boosts', component: () => import('@/components/boosts/BoostsIndex.vue')
     },
     {
@@ -22,7 +19,10 @@ const routes = [
     },
     {
         path: '/referrals', name: 'referrals', component: () => import('@/components/Referrals.vue')
-    }
+    },
+    {
+        path: '/posts', name: 'posts', component: () => { useWebAppPopup().showAlert("👨‍💻 In developing")}
+    },
 ]
 
 const router = createRouter({
