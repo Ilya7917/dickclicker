@@ -6,6 +6,10 @@ const messages = {
     account: {
       yourBalance: "Your balance",
       youDontHaveEnough: "You don't have enough coins to buy this",
+      yourDonateBalance: "Your donate balance"
+    },
+    slots: {
+      bottom: 'Slots',
     },
     referrals: {
       title: "Referrals",
@@ -33,7 +37,15 @@ const messages = {
     earn: {
       name: "Earn",
       channels: "Channels",
-      rewardReached: "Reward reached"
+      rewardReached: "Reward reached",
+      selectedChannel: `Subscribe to the channel and get`,
+      startRewardButton: "Start",
+      waitRewardText: "Wait 1 hours for moderation check to claim the prize.",
+      getRewardButton: "Claim",
+      notEnoughTime: "Give us 1 hour, the task is still being reviewed"
+    },
+    whales: {
+      channels: "Whales",
     },
     boosts: {
       level: "level",
@@ -79,6 +91,10 @@ const messages = {
     account: {
       yourBalance: "Ваш баланс",
       youDontHaveEnough: "У вас недостаточно монет для покупки этого",
+      yourDonateBalance: "Ваш донатный баланс"
+    },
+    slots: {
+      bottom: 'Слоты',
     },
     referrals: {
       title: "Рефералы",
@@ -106,7 +122,15 @@ const messages = {
     earn: {
       name: "Заработок",
       channels: "Каналы",
-      rewardReached: "Получено"
+      rewardReached: "Получено",
+      selectedChannel: `Подпишитесь на канал и получите`,
+      startRewardButton: "Начать",
+      waitRewardText: "Подождите 1 час, пока пройдет проверка модерации, чтобы получить приз.",
+      getRewardButton: "Получить",
+      notEnoughTime: "Дайте нам 1 час, задание ещё на проверке"
+    },
+    whales: {
+      channels: "Киты",
     },
     boosts: {
       level: "уровень",

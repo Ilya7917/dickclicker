@@ -18,10 +18,10 @@ const routes = [
         path: '/channels', name: 'channels', component: () => import('@/components/Channels.vue')
     },
     {
-        path: '/referrals', name: 'referrals', component: () => import('@/components/Referrals.vue')
+        path: '/slots', name: 'slots', component: () => useWebAppPopup().showAlert("In developing 🛠️")
     },
     {
-        path: '/posts', name: 'posts', component: () => { useWebAppPopup().showAlert("👨‍💻 In developing")}
+        path: '/posts', name: 'posts', component: () => useWebAppPopup().showAlert("In developing 🛠️")
     },
 ]
 
@@ -29,5 +29,12 @@ const router = createRouter({
     routes,
     history: createWebHistory()
 })
+
+/*
+    delete referal path
+    {
+        path: '/referrals', name: 'referrals', component: () => import('@/components/Referrals.vue')
+    },
+*/
 
 export default router

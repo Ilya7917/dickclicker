@@ -30,6 +30,7 @@ const onUserClick = () => {
 };
 
 onMounted(() => {
+    window.scrollTo(0, 0)
     // window.addEventListener('touchstart', onUserClick);
     // window.addEventListener('mousedown', onUserClick);
 });

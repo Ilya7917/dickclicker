@@ -28,9 +28,9 @@
         🍆
         <span>{{ $t("bottomMenu.skins") }}</span>
       </router-link>
-      <router-link class="menu-item" to="/referrals" tag="button">
-        🧑‍🤝‍🧑
-        <span>{{ $t("bottomMenu.referrals") }}</span>
+      <router-link class="menu-item" to="/slots" tag="button">
+        🎰
+        <span>{{ $t("slots.bottom") }}</span>
       </router-link>
       <router-link class="menu-item" to="/posts" tag="button">
         🌐

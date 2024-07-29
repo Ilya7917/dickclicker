@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useWebAppPopup } from 'vue-tg'
 
 export interface User {
     id: number;
     balance: number;
+    post_balance: number;
     first_name: string;
     language_code: string;
     energy: number;
@@ -49,6 +51,32 @@ export interface MiningResult {
     newEnergy: number;
 }
 
+export interface newPost {
+    image: File;
+    isPrivate: boolean;
+    description: string;
+    price: number;
+}
+
+export interface allPosts {
+    ID: number;
+    ImagePath: string;
+    OwnerName: string;
+    OwnerID: number;
+    AvatarURL: string;
+    IsPrivate: boolean;
+    Description: string;
+    Price: number;
+    Donated: number;
+}
+
+export interface boughtPosts {
+    ID: number;
+    IsUnlock: true;
+    PostID: number;
+    UserID: number;
+}
+
 
 
 export const useUserStore = defineStore('user', {
@@ -56,7 +84,11 @@ export const useUserStore = defineStore('user', {
         user: null as User | null,
         boosts: null as Boosts | null,
         skin: 0 as number | null,
-        bg: "#ff72e3" as string | null
+        bg: "#ff72e3" as string | null,
+        posts: null as allPosts[] | null,
+        boughtPosts: null as boughtPosts[] | null,
+        myPosts: null as allPosts[] | null,
+        posts_balance: 0 as number | null,
     }),
     getters: {
         getAccessToken: (state) => state.user?.access_token,
@@ -105,6 +137,133 @@ export const useUserStore = defineStore('user', {
             {
                 this.skin = id;
             }
+        },
+        async getPosts(){
+            if(!this.user) return;
+            const response = await axios.get(`${import.meta.env.VITE_API_HOST}/getPosts`, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            console.log(response);
+            this.posts = response.data;
+            
+        },
+        async exchangeDonateMoney(amount: number) {
+            if(!this.user) return;
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/exchangeDonateMoney`,
+                {
+                   amount: Number(amount)
+                },
+                {
+                  headers: {
+                    'x-api-key': this.user.access_token,
+                  }
+                }
+            );
+            console.log(response);
+            if(response.data.sucess) return true;
+            return false;
+        },
+        async unlockPost(postId: number) {
+            if (!this.user) return;
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/unlockPost`,
+                {
+                   postId: postId
+                },
+                {
+                  headers: {
+                    'x-api-key': this.user.access_token,
+                  }
+                }
+            );
+            console.log(response);
+            if(response.data.sucess){
+                this.user = response.data.user
+                return true;
+            }
+            return false;
+        },
+        async getMyBoughtPosts() {
+            if(!this.user) return;
+            const response = await axios.get(`${import.meta.env.VITE_API_HOST}/boughtPosts`, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            console.log(response);
+            if(response.data.length > 0) 
+            {
+                this.boughtPosts = response.data;
+                console.log(this.boughtPosts);
+            }
+        },
+        async getMyPosts() {
+            if(!this.user) return;
+            const response = await axios.get(`${import.meta.env.VITE_API_HOST}/getMyPosts`, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            console.log(response);
+            this.myPosts = response.data;
+        },
+        async donatePost(postId: number, amount: number){
+            if (!this.user) {
+                return
+            }
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/donatePost`,
+                {
+                   postId: postId,
+                   amount: Number(amount)
+                },
+                {
+                  headers: {
+                    'x-api-key': this.user.access_token,
+                  }
+                }
+            );
+            if(response.data.sucess) {
+                this.user = response.data.user
+                return true;
+            } 
+        },
+        async createPost(post: newPost)
+        {
+            if(!this.user) return;
+            const formData = new FormData();
+            formData.append('image', post.image);
+            formData.append('isPrivate', post.isPrivate.toString()); // Преобразование булевого значения в строку
+            formData.append('description',post.description);
+            formData.append('price', post.price.toString()); // Преобразование числа в строку
+        
+            const response = await fetch(`${import.meta.env.VITE_API_HOST}/createPost`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+              });
+              const result = await response.json();
+              console.log(result);
+              if(result.sucess) {
+                this.user = result.user;
+                return true;
+              }
+              return false;
+        },
+        async getMyPostsBalance() {
+            if(!this.user) return;
+            const response = await axios.get(`${import.meta.env.VITE_API_HOST}/getUserPostsBalance`, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            console.log(response);
+            this.posts_balance = response.data;
         },
         async buyNewSkin(skinId: number)
         {
@@ -242,6 +401,36 @@ export const useUserStore = defineStore('user', {
                 }
             });
             return result.data
+        },
+        async spinSlot() {
+            if(!this.user) return;
+            const result = await axios.post(`${import.meta.env.VITE_API_HOST}/spin`, {}, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            if(result.data.sucess) {
+                this.user = result.data.user;
+                return true;
+            }
+            return false;
+            console.log(result);
+        },
+        async getReward(winCode: number) {
+            if(!this.user) return;
+            const result = await axios.post(`${import.meta.env.VITE_API_HOST}/reward`, {
+                code: winCode
+            }, {
+                headers: {
+                    'x-api-key': this.user.access_token,
+                }
+            });
+            if(result.data.sucess) {
+                this.user = result.data.user;
+                return true;
+            }
+            return false;
+            console.log(result);
         },
         recharge() {
             if (this.user) {

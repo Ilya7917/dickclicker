@@ -262,6 +262,9 @@ const claimDailyBooster = () => {
                         <img :src="question" :style="{ width: '100px', height: '100px' }" />
                         <span v-if="checkBeforeIndex(skin.id)" :style="{ color: '#aeaeae', fontSize: '25px', marginTop: '15px'}">{{ 1000 * skin.id }}🍆</span>
                     </div>
+                    <div v-if="skin.isUnlock && skin.id == 1" :style="{ position: 'absolute', bottom: '0', right: '0',  }">
+                        <span :style="{ fontSize:'13px', padding: '10px' }">by Freepic</span>
+                    </div>
                 </div>
         </div>
     </div>
@@ -348,6 +351,7 @@ const claimDailyBooster = () => {
     padding: 10px;
     border-radius: 15px;
     cursor: pointer;
+    position: relative
 }
 
 .boost-active {
@@ -359,6 +363,7 @@ const claimDailyBooster = () => {
     padding: 10px;
     border-radius: 15px;
     cursor: pointer;
+    position: relative;
 }
 
 .daily-boost {

@@ -2,6 +2,7 @@
 import { useLeaderboardStore } from '@/store/leaderboard';
 import { useUserStore } from '@/store/user';
 import { onMounted, ref } from 'vue';
+import { useWebAppPopup } from 'vue-tg'
 
 
 const leaderboardStore = useLeaderboardStore()
