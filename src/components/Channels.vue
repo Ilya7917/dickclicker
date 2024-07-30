@@ -23,6 +23,8 @@ const selectedChannel = ref({
     invite_link: "",
     status: "",
     createdAt: "",
+    available: false,
+    is_available: false,
 
 });
 const fetchFunction = () => {
@@ -64,6 +66,13 @@ onMounted(() => {
 });
 
 const openChannelLink = (channel: Channel, state: string) => {
+
+  if(!channel.available) {
+    console.log('channel is not available');
+    useWebAppPopup().showAlert(t("Канал недоступен"))
+    return;
+  }
+
   if(channelsStore.myChannels?.length != null && channelsStore.myChannels?.length > 0) {
       let index = channelsStore.myChannels.findIndex(x => x.ChannelID == channel.id);
       console.log(index);
@@ -77,16 +86,17 @@ const openChannelLink = (channel: Channel, state: string) => {
         selectedChannel.value.createdAt = '';
       }
   }
-  console.log(selectedChannel);
+  console.log(channelsStore.myChannels);
   // channel.is_available = false
   selectedChannel.value.id = channel.id
   selectedChannel.value.reward = channel.reward
   selectedChannel.value.title = channel.title
   selectedChannel.value.invite_link = channel.invite_link
+  selectedChannel.value.available = channel.available
+  selectedChannel.value.is_available = channel.is_available
   isPopupVisible.value = false;
   popupState.value = state;
   setTimeout(reOpenPopup, 100)
-  console.log(isPopupVisible);
   // wn.openTelegramLink(channel.invite_link)
 }
 
@@ -96,6 +106,7 @@ const onPressStartButton = () => {
     id: selectedChannel.value.id,
     title: selectedChannel.value.title,
     invite_link: selectedChannel.value.invite_link,
+    available: true,
     reward: 0,
     is_available: true,
     is_whale: false
@@ -134,13 +145,14 @@ const checkTimeTillGetReward = () => {
   console.log("check time: " + selectedChannel.value.createdAt);
   console.log("Hours since request: " + hoursDifference);
 
-  if (hoursDifference >= 1) {
+  if (hoursDifference >= 0) {
     const channel =  {
       id: selectedChannel.value.id,
       title: selectedChannel.value.title,
       invite_link: selectedChannel.value.invite_link,
       reward: 0,
       is_available: true,
+      available: true,
       is_whale: false
     }
     channelsStore.rewardChannel(channel).then(() => {
@@ -233,12 +245,13 @@ const handleEnter = (event: KeyboardEvent) => {
             📢 {{ $t("earn.channels") }}
           </div>
           <div v-if="isCanView" class="channels-list">
-            <div v-for="channel in channelsStore.channels?.filter(c => c.is_available && !c.is_whale)"  :key="channel.id" @click="openChannelLink(channel, 'visible')" class="channel">
+            <div v-for="channel in channelsStore.channels?.filter(c => !c.is_whale)"  :key="channel.id" @click="channel.is_available ? openChannelLink(channel, 'visible') : null" class="channel">
               <div class="channel-info">
                 <span class="name">{{ channel.title }}</span>
               </div>
               <div class="channel-action">
                 <span v-if="channel.is_available" class="reward">🍆 {{ channel.reward.toLocaleString() }}</span>
+                <span v-else>Награда получена</span>
                 <svg class="arrow">
                   <use xlink:href="@/assets/images/sprite.svg#chevron-right"></use>
                 </svg>
@@ -257,12 +270,13 @@ const handleEnter = (event: KeyboardEvent) => {
             </div>
           </div>
           <div v-if="isCanView" class="channels-list" :style="{ height: '40vh', overflowY:'scroll'}">
-            <div v-for="chan in channelsStore.whales?.filter(c => c.is_available)"  :key="chan.id" @click="openChannelLink(chan, 'visible')" class="channel">
+            <div v-for="chan in channelsStore.whales" :key="chan.id" @click="chan.is_available ? openChannelLink(chan, 'visible') : null" :class="chan.available ? 'channel' : 'channel-disable'">
               <div class="channel-info">
                 <span class="name">{{ chan.title }}</span>
               </div>
               <div class="channel-action">
                 <span v-if="chan.is_available" class="reward">🍆 {{ chan.reward.toLocaleString() }}</span>
+                <span v-else>Награда получена</span>
                 <svg class="arrow">
                   <use xlink:href="@/assets/images/sprite.svg#chevron-right"></use>
                 </svg>
@@ -368,6 +382,17 @@ input[type=number] {
   align-items: center;
   margin: 10px;
   background: rgba(128, 128, 128, 0.1);
+  color: #fff;
+  padding: 20px 10px;
+  border-radius: 8px;
+}
+
+.channel-disable {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px;
+  background: rgba(171, 10, 10, 0.1);
   color: #fff;
   padding: 20px 10px;
   border-radius: 8px;

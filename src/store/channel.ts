@@ -14,6 +14,7 @@ export interface Channel {
     reward: number;
     avatar_url?: string;
     is_available: boolean;
+    available: boolean;
     is_whale: boolean;
 };
 
@@ -93,6 +94,7 @@ export const useChannelsStore = defineStore('channels', {
                     'x-api-key': userStore.getAccessToken,
                 }
             });
+            console.log(response);
             this.myChannels = toRaw(response.data.channels)
         },
         async rewardChannel(channel: Channel){
