@@ -60,12 +60,31 @@ const fetchFunction = () => {
       })
       channelsStore.whales = whales.length > 0 ? whales : [];
       whales.sort((a, b) => {
+        // Сначала сортируем по myUserId.value
         if (a.user_id === myUserId.value && b.user_id !== myUserId.value) {
           return -1;
         }
         if (a.user_id !== myUserId.value && b.user_id === myUserId.value) {
           return 1;
         }
+
+        // Затем сортируем по is_available
+        if (a.is_available && !b.is_available) {
+          return -1;
+        }
+        if (!a.is_available && b.is_available) {
+          return 1;
+        }
+
+        // Затем сортируем по available
+        if (a.available && !b.available) {
+          return -1;
+        }
+        if (!a.available && b.available) {
+          return 1;
+        }
+
+        // Если предыдущие условия не сработали, оставляем порядок как есть
         return 0;
       });
       console.log(channelsStore.whales);
@@ -85,7 +104,7 @@ const openChannelLink = (channel: Channel, state: string) => {
 
   if(!channel.available && channel.user_id != myUserId.value) {
     console.log('channel is not available');
-    useWebAppPopup().showAlert(t("Канал недоступен"))
+    useWebAppPopup().showAlert(t("У кита закончился баланс 🍆"))
     return;
   }
 
@@ -164,7 +183,7 @@ const checkTimeTillGetReward = () => {
   console.log("check time: " + selectedChannel.value.createdAt);
   console.log("Hours since request: " + hoursDifference);
 
-  if (hoursDifference >= 0) {
+  if (hoursDifference >= 1) {
     const channel =  {
       id: selectedChannel.value.id,
       title: selectedChannel.value.title,
@@ -220,6 +239,14 @@ async function createNewWhale() {
     console.error("Invalid Telegram URL format");
     useWebAppPopup().showAlert(t("Invalid Telegram URL format"))
     return;
+  }
+
+  if(channelsStore.channels != null) {
+     let index = channelsStore.channels.findIndex(x => x.user_id == myUserId.value);
+     if(index != -1){
+      useWebAppPopup().showAlert(t("Вы не можете создать больше 1 кита"))
+      return;
+     }
   }
 
   channelsStore.createWhale(newWhaleData.value.title, newWhaleData.value.link, newWhaleData.value.rewared).then(result => {
@@ -320,7 +347,7 @@ const deleteUserWhale = (channelId: number) => {
             </div>
           </div>
           <div v-if="isCanView" class="channels-list" :style="{ height: '40vh', overflowY:'scroll'}">
-            <div v-for="chan in channelsStore.whales" :key="chan.id" @click="chan.is_available ? openChannelLink(chan, 'visible') : null" :class="chan.available ? 'channel' : 'channel-disable'">
+            <div v-for="chan in channelsStore.whales" :key="chan.id" @click="chan.is_available ? openChannelLink(chan, 'visible') : wn.openTelegramLink(chan.invite_link)" :class="chan.available ? 'channel' : 'channel-disable'">
               <div class="channel-info" :style="{ display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center' }">
                 <img v-if="chan.channel_avatar != ''" :src="chan.channel_avatar" :style="{ height:'30px', borderRadius:'100px'}" />
                 <div v-else :style="{ height:'30px', width:'30px', borderRadius:'100px', background:'gray', justifyContent:'center', alignItems:'center', display:'flex' }">🐳</div>
@@ -347,7 +374,7 @@ const deleteUserWhale = (channelId: number) => {
 <!--        <div class="popup-overlay" @click="closePopup"></div>-->
         <div class="popup-content" v-click-outside="closePopup">
             <div class="popup-header">
-                <h2>{{ popupState == 'create' ? 'Create whale' : 'Earn coins' }}</h2>
+                <h2>{{ popupState == 'create' ? 'Create whale' : selectedChannel.title }}</h2>
                 <button class="close-button" @click="isPopupVisible = false;">
                   <svg class="close-icon" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 30 30" width="16px" height="16px">
                     <path d="M 7 4 C 6.744125 4 6.4879687 4.0974687 6.2929688 4.2929688 L 4.2929688 6.2929688 C 3.9019687 6.6839688 3.9019687 7.3170313 4.2929688 7.7070312 L 11.585938 15 L 4.2929688 22.292969 C 3.9019687 22.683969 3.9019687 23.317031 4.2929688 23.707031 L 6.2929688 25.707031 C 6.6839688 26.098031 7.3170313 26.098031 7.7070312 25.707031 L 15 18.414062 L 22.292969 25.707031 C 22.682969 26.098031 23.317031 26.098031 23.707031 25.707031 L 25.707031 23.707031 C 26.098031 23.316031 26.098031 22.682969 25.707031 22.292969 L 18.414062 15 L 25.707031 7.7070312 C 26.098031 7.3170312 26.098031 6.6829688 25.707031 6.2929688 L 23.707031 4.2929688 C 23.316031 3.9019687 22.682969 3.9019687 22.292969 4.2929688 L 15 11.585938 L 7.7070312 4.2929688 C 7.5115312 4.0974687 7.255875 4 7 4 z"/>
@@ -364,7 +391,7 @@ const deleteUserWhale = (channelId: number) => {
                 <p>Награда за переход: 🍆{{ selectedChannel.reward }}</p>
                 <div :style="{ marginTop: '15px' }">
                   <button class="boost-purchase-button" @click="stopActiveChannel(selectedChannel.id)">{{ selectedChannel.available ? 'Остановить' : 'Включить' }}</button>
-                  <button class="boost-purchase-button" :style="{marginTop:'15px'}" @click="deleteUserWhale(selectedChannel.id)">Удалить</button>
+                  <button v-if="!selectedChannel.available && (userStore.user?.balance != undefined && userStore.user?.balance <= selectedChannel.reward)" class="boost-purchase-button" :style="{marginTop:'15px'}" @click="deleteUserWhale(selectedChannel.id)">Удалить</button>
                 </div>
             </div>
             <div v-if="popupState == 'create'" class="popup-body" @keydown.enter="handleEnter" :style="{ overflowY: 'scroll' }">
