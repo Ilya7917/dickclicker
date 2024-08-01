@@ -16,6 +16,8 @@ export interface Channel {
     is_available: boolean;
     available: boolean;
     is_whale: boolean;
+    user_id: number;
+    channel_avatar: string;
 };
 
 export interface ChannelMember {
@@ -44,6 +46,7 @@ export const useChannelsStore = defineStore('channels', {
                     'x-api-key': userStore.getAccessToken,
                 }
             });
+            console.log(response);
             this.channels = response.data;
         },
         async fetchWhales() {
@@ -111,6 +114,34 @@ export const useChannelsStore = defineStore('channels', {
             console.log(response.data);
             setUser(response.data.user);
             this.myChannels = response.data.channels
+            return true;
+        },
+        async changeChannelAvailable(channelId: number) {
+            const userStore = useUserStore();
+            const response = await axios.post(`${import.meta.env.VITE_API_HOST}/changeChannelAvailable`,
+                {
+                    id: channelId
+                },
+                {
+                headers: {
+                    'x-api-key': userStore.getAccessToken,
+                },
+            });
+            console.log(response.data);
+            return true;
+        },
+        async deleteWhale(channelId: number) {
+            const userStore = useUserStore();
+            const response = await axios.post(`${import.meta.env.VITE_API_HOST}/deleteWhale`,
+                {
+                    id: channelId
+                },
+                {
+                headers: {
+                    'x-api-key': userStore.getAccessToken,
+                },
+            });
+            console.log(response.data);
             return true;
         }
     },

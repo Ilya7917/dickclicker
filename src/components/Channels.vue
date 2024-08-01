@@ -6,6 +6,7 @@ import { differenceInHours } from 'date-fns';
 import { useWebAppPopup } from 'vue-tg'
 import { useI18n } from 'vue-i18n';
 import AddIcon from "@/assets/images/addIcon.svg";
+import { useUserStore } from '@/store/user';
 const { t } = useI18n();
 
 const channelsStore = useChannelsStore();
@@ -13,8 +14,10 @@ const wn = useWebAppNavigation()
 const isPopupVisible = ref(false);
 const isCanView = ref(false);
 
-
+const userStore = useUserStore();
 const { getChannels } = channelsStore;
+
+const myUserId = ref(-1);
 
 const selectedChannel = ref({
     id: 0,
@@ -23,6 +26,7 @@ const selectedChannel = ref({
     invite_link: "",
     status: "",
     createdAt: "",
+    owner_id: 0,
     available: false,
     is_available: false,
 
@@ -55,6 +59,15 @@ const fetchFunction = () => {
         if(item.is_whale) whales.push(item);
       })
       channelsStore.whales = whales.length > 0 ? whales : [];
+      whales.sort((a, b) => {
+        if (a.user_id === myUserId.value && b.user_id !== myUserId.value) {
+          return -1;
+        }
+        if (a.user_id !== myUserId.value && b.user_id === myUserId.value) {
+          return 1;
+        }
+        return 0;
+      });
       console.log(channelsStore.whales);
       isCanView.value = true;
     });
@@ -63,11 +76,14 @@ const fetchFunction = () => {
 
 onMounted(() => {
   fetchFunction()
+  if(userStore.user?.id != undefined){ 
+   myUserId.value = userStore.user?.id
+  }
 });
 
 const openChannelLink = (channel: Channel, state: string) => {
 
-  if(!channel.available) {
+  if(!channel.available && channel.user_id != myUserId.value) {
     console.log('channel is not available');
     useWebAppPopup().showAlert(t("Канал недоступен"))
     return;
@@ -89,6 +105,7 @@ const openChannelLink = (channel: Channel, state: string) => {
   console.log(channelsStore.myChannels);
   // channel.is_available = false
   selectedChannel.value.id = channel.id
+  selectedChannel.value.owner_id = channel.user_id;
   selectedChannel.value.reward = channel.reward
   selectedChannel.value.title = channel.title
   selectedChannel.value.invite_link = channel.invite_link
@@ -109,7 +126,9 @@ const onPressStartButton = () => {
     available: true,
     reward: 0,
     is_available: true,
-    is_whale: false
+    channel_avatar: '',
+    is_whale: false,
+    user_id: 0
   }
 
   channelsStore.startChannel(channel).then(result => {
@@ -153,7 +172,9 @@ const checkTimeTillGetReward = () => {
       reward: 0,
       is_available: true,
       available: true,
-      is_whale: false
+      channel_avatar: '',
+      is_whale: false,
+      user_id: 0
     }
     channelsStore.rewardChannel(channel).then(() => {
       console.log("request finished");
@@ -231,6 +252,35 @@ const handleEnter = (event: KeyboardEvent) => {
   (event.target as HTMLInputElement).blur();
 };
 
+
+const stopActiveChannel = (channelId: number) => {
+    const elemIndex = channelsStore.whales?.findIndex(x => x.id == channelId);
+    if(elemIndex != -1 && elemIndex != undefined){
+      if(channelsStore.whales != null && channelsStore.whales[elemIndex].id == channelId){
+        channelsStore.changeChannelAvailable(channelId).then(result => {
+          if(result) {
+            isPopupVisible.value = false;
+            fetchFunction();
+          }
+        })
+      }
+    }
+}
+
+const deleteUserWhale = (channelId: number) => {
+  const elemIndex = channelsStore.whales?.findIndex(x => x.id == channelId);
+  if(elemIndex != -1 && elemIndex != undefined){
+    if(channelsStore.whales != null && channelsStore.whales[elemIndex].id == channelId){
+        channelsStore.deleteWhale(channelId).then(result => {
+        if(result) {
+            isPopupVisible.value = false;
+            fetchFunction();
+          }
+        })
+      }
+  }
+}
+
 </script>
 
 <template>
@@ -271,8 +321,11 @@ const handleEnter = (event: KeyboardEvent) => {
           </div>
           <div v-if="isCanView" class="channels-list" :style="{ height: '40vh', overflowY:'scroll'}">
             <div v-for="chan in channelsStore.whales" :key="chan.id" @click="chan.is_available ? openChannelLink(chan, 'visible') : null" :class="chan.available ? 'channel' : 'channel-disable'">
-              <div class="channel-info">
-                <span class="name">{{ chan.title }}</span>
+              <div class="channel-info" :style="{ display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center' }">
+                <img v-if="chan.channel_avatar != ''" :src="chan.channel_avatar" :style="{ height:'30px', borderRadius:'100px'}" />
+                <div v-else :style="{ height:'30px', width:'30px', borderRadius:'100px', background:'gray', justifyContent:'center', alignItems:'center', display:'flex' }">🐳</div>
+                <span class="name" :style="{ marginLeft:'10px' }">{{ chan.title }} </span>
+                <span v-if="chan.user_id == myUserId">👑</span>
               </div>
               <div class="channel-action">
                 <span v-if="chan.is_available" class="reward">🍆 {{ chan.reward.toLocaleString() }}</span>
@@ -301,10 +354,18 @@ const handleEnter = (event: KeyboardEvent) => {
                   </svg>
                 </button>
             </div>
-            <div v-if="popupState == 'visible'" class="popup-body">
+            <div v-if="popupState == 'visible' && selectedChannel.owner_id != myUserId" class="popup-body">
                 <p>{{ selectedChannel.status == "init" ? $t("earn.waitRewardText") : $t("earn.selectedChannel") }}</p>
                 <p>🍆{{ selectedChannel.reward }}</p>
                 <button class="boost-purchase-button" @click="selectedChannel.status == 'init' ? checkTimeTillGetReward() : onPressStartButton()">{{ selectedChannel.status == "init" ?  $t("earn.getRewardButton") : $t("earn.startRewardButton") }}</button>
+            </div>
+            <div v-if="popupState == 'visible' && selectedChannel.owner_id == myUserId" class="popup-body">
+                <p>Этот канал принадлежит вам</p>
+                <p>Награда за переход: 🍆{{ selectedChannel.reward }}</p>
+                <div :style="{ marginTop: '15px' }">
+                  <button class="boost-purchase-button" @click="stopActiveChannel(selectedChannel.id)">{{ selectedChannel.available ? 'Остановить' : 'Включить' }}</button>
+                  <button class="boost-purchase-button" :style="{marginTop:'15px'}" @click="deleteUserWhale(selectedChannel.id)">Удалить</button>
+                </div>
             </div>
             <div v-if="popupState == 'create'" class="popup-body" @keydown.enter="handleEnter" :style="{ overflowY: 'scroll' }">
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
