@@ -454,8 +454,8 @@ const topUpWhaleBalance = (channelId :number) => {
             </div>
             <div v-if="popupState == 'create'" class="popup-body" @keydown.enter="handleEnter" :style="{ overflowY: 'scroll' }">
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
-                <label for="fname" >Ссылка на канал</label>
-                <input type="text" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.link">
+                <label for="fname" >Баланс кита</label>
+                <input type="number" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.balance">
               </div>
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
                 <label for="fname" >Цена за переход</label>
@@ -463,8 +463,8 @@ const topUpWhaleBalance = (channelId :number) => {
               </div>
 
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
-                <label for="fname" >Баланс кита</label>
-                <input type="number" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.balance">
+                <label for="fname" >Ссылка на канал</label>
+                <input type="text" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.link">
               </div>
 
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
