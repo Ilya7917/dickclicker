@@ -7,6 +7,7 @@ import { useWebAppPopup } from 'vue-tg'
 import { useI18n } from 'vue-i18n';
 import AddIcon from "@/assets/images/addIcon.svg";
 import { useUserStore } from '@/store/user';
+import Balance from './account/Balance.vue';
 const { t } = useI18n();
 
 const channelsStore = useChannelsStore();
@@ -23,6 +24,7 @@ const selectedChannel = ref({
     id: 0,
     title: "",
     reward: 0,
+    balance: 0,
     invite_link: "",
     status: "",
     createdAt: "",
@@ -68,15 +70,7 @@ const fetchFunction = () => {
           return 1;
         }
 
-        // Затем сортируем по is_available
-        if (a.is_available && !b.is_available) {
-          return -1;
-        }
-        if (!a.is_available && b.is_available) {
-          return 1;
-        }
-
-        // Затем сортируем по available
+         // Затем сортируем по available
         if (a.available && !b.available) {
           return -1;
         }
@@ -84,6 +78,13 @@ const fetchFunction = () => {
           return 1;
         }
 
+        // Затем сортируем по is_available
+        if (a.is_available && !b.is_available) {
+          return -1;
+        }
+        if (!a.is_available && b.is_available) {
+          return 1;
+        }
         // Если предыдущие условия не сработали, оставляем порядок как есть
         return 0;
       });
@@ -105,6 +106,7 @@ const openChannelLink = (channel: Channel, state: string) => {
   if(!channel.available && channel.user_id != myUserId.value) {
     console.log('channel is not available');
     useWebAppPopup().showAlert(t("У кита закончился баланс 🍆"))
+    wn.openTelegramLink(channel.invite_link)
     return;
   }
 
@@ -124,6 +126,7 @@ const openChannelLink = (channel: Channel, state: string) => {
   console.log(channelsStore.myChannels);
   // channel.is_available = false
   selectedChannel.value.id = channel.id
+  selectedChannel.value.balance = channel.balance
   selectedChannel.value.owner_id = channel.user_id;
   selectedChannel.value.reward = channel.reward
   selectedChannel.value.title = channel.title
@@ -144,6 +147,7 @@ const onPressStartButton = () => {
     invite_link: selectedChannel.value.invite_link,
     available: true,
     reward: 0,
+    balance: 0,
     is_available: true,
     channel_avatar: '',
     is_whale: false,
@@ -191,6 +195,7 @@ const checkTimeTillGetReward = () => {
       reward: 0,
       is_available: true,
       available: true,
+      balance: 0,
       channel_avatar: '',
       is_whale: false,
       user_id: 0
@@ -221,7 +226,7 @@ const openCreateWhaleForm = () => {
 
 
 const newWhaleData = ref({
-  title: "",
+  balance: 0,
   link: "",
   rewared: 0,
 })
@@ -233,7 +238,7 @@ function isValidTelegramUrl(url: string) {
 
 
 async function createNewWhale() {
-  if (newWhaleData.value.title === "" || newWhaleData.value.link === "" || newWhaleData.value.rewared === 0) return;
+  if (newWhaleData.value.link === "" || newWhaleData.value.rewared == 0) return;
 
   if (!isValidTelegramUrl(newWhaleData.value.link)) {
     console.error("Invalid Telegram URL format");
@@ -241,6 +246,16 @@ async function createNewWhale() {
     return;
   }
 
+  if(userStore.user != null && newWhaleData.value.balance < userStore.user?.balance) {
+    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в кита"))
+    return;
+  }
+
+  if(newWhaleData.value.rewared > newWhaleData.value.balance) {
+    useWebAppPopup().showAlert(t("❌ Вы не можете выдавать юзерам больше, чем будет на балансе кита ❌"))
+    return;
+  }
+  
   if(channelsStore.channels != null) {
      let index = channelsStore.channels.findIndex(x => x.user_id == myUserId.value);
      if(index != -1){
@@ -248,8 +263,9 @@ async function createNewWhale() {
       return;
      }
   }
+  
 
-  channelsStore.createWhale(newWhaleData.value.title, newWhaleData.value.link, newWhaleData.value.rewared).then(result => {
+  channelsStore.createWhale(newWhaleData.value.balance, newWhaleData.value.link, newWhaleData.value.rewared).then(result => {
     if (result) {
       fetchFunction();
       isPopupVisible.value = false;
@@ -306,6 +322,33 @@ const deleteUserWhale = (channelId: number) => {
         })
       }
   }
+}
+
+const myChannelPopupState = ref('view');
+
+const updateWhaleBalance = ref(0);
+
+const topUpWhaleBalance = (channelId :number) => {
+  if(userStore.user == null) return;
+
+  if(updateWhaleBalance.value == 0) {
+    useWebAppPopup().showAlert(t("Нельзя пополнить на 0 🍆"))
+    return;
+  }
+
+  if(userStore.user.balance < updateWhaleBalance.value) {
+    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в кита"))
+    return;
+  }
+
+  channelsStore.topUpWhale(channelId, updateWhaleBalance.value).then(result => {
+    if(result) {
+       isPopupVisible.value = false;
+       myChannelPopupState.value = 'view';
+       fetchFunction();
+    }
+  })
+
 }
 
 </script>
@@ -389,26 +432,34 @@ const deleteUserWhale = (channelId: number) => {
                 <button class="boost-purchase-button" @click="selectedChannel.status == 'init' ? checkTimeTillGetReward() : onPressStartButton()">{{ selectedChannel.status == "init" ?  $t("earn.getRewardButton") : $t("earn.startRewardButton") }}</button>
             </div>
             <div v-if="popupState == 'visible' && selectedChannel.owner_id == myUserId" class="popup-body">
-                <p>Этот канал принадлежит вам</p>
-                <p>Награда за переход: 🍆{{ selectedChannel.reward }}</p>
-                <div :style="{ marginTop: '15px' }">
+                <p v-if="myChannelPopupState == 'view'">Этот канал принадлежит вам</p>
+                <p v-if="myChannelPopupState == 'view'">Награда за переход: 🍆{{ selectedChannel.reward }}</p>
+                <p v-if="myChannelPopupState == 'view'">Оставшийся баланс кита: 🍆{{ selectedChannel.balance }}</p>
+                <div v-if="myChannelPopupState == 'view'" :style="{ marginTop: '15px' }">
                   <button class="boost-purchase-button" @click="stopActiveChannel(selectedChannel.id)">{{ selectedChannel.available ? 'Остановить' : 'Включить' }}</button>
+                  <button class="boost-purchase-button" @click="myChannelPopupState = 'topUp'" :style="{marginTop:'15px'}">Пополнить</button>
                   <button v-if="!selectedChannel.available && (userStore.user?.balance != undefined && userStore.user?.balance <= selectedChannel.reward)" class="boost-purchase-button" :style="{marginTop:'15px'}" @click="deleteUserWhale(selectedChannel.id)">Удалить</button>
+                </div>
+                <div v-else :style="{ marginTop: '15px' }">
+                  <span>Насколько желаете пополнить кита?🐳</span>
+                  <input type="number" id="fname" :style="{ width: '100%'}" name="fname" v-model="updateWhaleBalance">
+                  <button class="boost-purchase-button" @click="topUpWhaleBalance(selectedChannel.id)" :style="{marginTop:'15px'}">Пополнить</button>
+                  <button class="boost-purchase-button" @click="myChannelPopupState = 'view'" :style="{marginTop:'15px'}">Назад</button>
                 </div>
             </div>
             <div v-if="popupState == 'create'" class="popup-body" @keydown.enter="handleEnter" :style="{ overflowY: 'scroll' }">
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
-                <label for="fname" >Название канала</label>
-                <input type="text" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.title">
-              </div>
-              <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
                 <label for="fname" >Ссылка на канал</label>
                 <input type="text" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.link">
               </div>
-
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
                 <label for="fname" >Цена за переход</label>
                 <input type="number" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.rewared">
+              </div>
+
+              <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">
+                <label for="fname" >Баланс кита</label>
+                <input type="number" id="fname" :style="{ width: '100%'}" name="fname" v-model="newWhaleData.balance">
               </div>
 
               <div :style="{ display:'flex', flexDirection:'column', justifyContent:'center', marginTop:'30px'}">

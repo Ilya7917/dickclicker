@@ -2,6 +2,7 @@ import axios from 'axios';
 import { defineStore } from 'pinia'
 import { isProxy, toRaw } from 'vue';
 import { useUserStore } from './user';
+import Balance from '@/components/account/Balance.vue';
 
 const userStore = useUserStore()
 
@@ -11,6 +12,7 @@ export interface Channel {
     id: number;
     title: string;
     invite_link: string;
+    balance: number;
     reward: number;
     avatar_url?: string;
     is_available: boolean;
@@ -73,11 +75,11 @@ export const useChannelsStore = defineStore('channels', {
             this.myChannels = response.data.channels
             return true;
         },
-        async createWhale(title: string, link: string, rewarded: number) {
+        async createWhale(channelBalance: number, link: string, rewarded: number) {
             const userStore = useUserStore();
             const response = await axios.post(`${import.meta.env.VITE_API_HOST}/createWhale`,
                 {
-                    title: title,
+                    balance: channelBalance,
                     link: link,
                     rewarded: rewarded
                 },
@@ -87,7 +89,10 @@ export const useChannelsStore = defineStore('channels', {
                 },
             });
             console.log(response)
-            if(response.data.sucess) return true;
+            if(response.data.sucess) {
+                if(userStore.user?.balance != null) { userStore.user.balance -= channelBalance }
+                return true 
+            };
             return false;
         },
         async getMyChannels(){
@@ -135,6 +140,21 @@ export const useChannelsStore = defineStore('channels', {
             const response = await axios.post(`${import.meta.env.VITE_API_HOST}/deleteWhale`,
                 {
                     id: channelId
+                },
+                {
+                headers: {
+                    'x-api-key': userStore.getAccessToken,
+                },
+            });
+            console.log(response.data);
+            return true;
+        },
+        async topUpWhale(channelId: number, balance: number) {
+            const userStore = useUserStore();
+            const response = await axios.post(`${import.meta.env.VITE_API_HOST}/topUpWhale`,
+                {
+                    id: channelId,
+                    balance: balance
                 },
                 {
                 headers: {
