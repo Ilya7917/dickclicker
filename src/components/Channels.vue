@@ -17,7 +17,7 @@ const isCanView = ref(false);
 const userStore = useUserStore();
 const { getChannels } = channelsStore;
 
-const myUserId = ref(-1);
+const myUserId = ref(5879286931);
 
 const selectedChannel = ref({
     id: 0,
@@ -322,9 +322,11 @@ const deleteUserWhale = (channelId: number) => {
             📢 {{ $t("earn.channels") }}
           </div>
           <div v-if="isCanView" class="channels-list">
-            <div v-for="channel in channelsStore.channels?.filter(c => !c.is_whale)"  :key="channel.id" @click="channel.is_available ? openChannelLink(channel, 'visible') : null" class="channel">
-              <div class="channel-info">
-                <span class="name">{{ channel.title }}</span>
+            <div v-for="channel in channelsStore.channels?.filter(c => !c.is_whale)"  :key="channel.id" @click="channel.is_available ? openChannelLink(channel, 'visible') : wn.openTelegramLink(channel.invite_link)" class="channel">
+              <div class="channel-info" :style="{ display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center' }">
+                <img v-if="channel.channel_avatar != ''" :src="channel.channel_avatar" :style="{ height:'30px', borderRadius:'100px'}" />
+                <div v-else :style="{ height:'30px', width:'30px', borderRadius:'100px', background:'gray', justifyContent:'center', alignItems:'center', display:'flex' }">📢</div>
+                <span class="name" :style="{ marginLeft:'10px' }">{{ channel.title }}</span>
               </div>
               <div class="channel-action">
                 <span v-if="channel.is_available" class="reward">🍆 {{ channel.reward.toLocaleString() }}</span>
