@@ -246,8 +246,13 @@ async function createNewWhale() {
     return;
   }
 
-  if(userStore.user != null && newWhaleData.value.balance < userStore.user?.balance) {
+  if(userStore.user != null && newWhaleData.value.balance > userStore.user?.balance) {
     useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в кита"))
+    return;
+  }
+  
+  if(newWhaleData.value.balance == 0){
+    useWebAppPopup().showAlert(t("Баланс кита не может быть 0"))
     return;
   }
 
