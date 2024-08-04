@@ -18,7 +18,7 @@ const isCanView = ref(false);
 const userStore = useUserStore();
 const { getChannels } = channelsStore;
 
-const myUserId = ref(5879286931);
+const myUserId = ref(0);
 
 const selectedChannel = ref({
     id: 0,
@@ -252,12 +252,12 @@ async function createNewWhale() {
   }
   
   if(newWhaleData.value.balance == 0){
-    useWebAppPopup().showAlert(t("Баланс кита не может быть 0🍆"))
+    useWebAppPopup().showAlert(t("Баланс канала рекламы не может быть 0🍆"))
     return;
   }
 
   if(newWhaleData.value.balance < 10000) {
-    useWebAppPopup().showAlert(t("Баланс кита не может быть меньше 10.000🍆"))
+    useWebAppPopup().showAlert(t("Баланс рекламы канала не может быть меньше 10.000🍆"))
     return;
   }
 
@@ -266,11 +266,17 @@ async function createNewWhale() {
     return;
   }
 
+
   if(channelsStore.channels != null) {
      let index = channelsStore.channels.findIndex(x => x.user_id == myUserId.value);
      if(index != -1){
-      useWebAppPopup().showAlert(t("Вы не можете создать больше 1-ой рекламы канала"))
-      return;
+      let count = channelsStore.channels.filter(x => x.user_id == myUserId.value).length;
+      if(count > 0){
+        if(userStore.user != null && userStore.user?.balance < ((count*10000) + newWhaleData.value.balance)){
+          useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы создать ещё один рекламный канал"))
+          return;
+        }
+      }
      }
   }
   isNextButton.value = false;
@@ -405,7 +411,12 @@ const nextButtonChangeState = () => {
     }
     if(progressPost.value == 1) {
       if(newWhaleData.value.rewared <= 0) {
-        useWebAppPopup().showAlert(t("❌ Цена за переход не может быть меньше 0 ❌"))
+        useWebAppPopup().showAlert(t("❌ Цена за переход не может быть меньше 0 🍆 ❌"))
+        return;
+      }
+
+      if(newWhaleData.value.rewared < 500) {
+        useWebAppPopup().showAlert(t("❌ Цена за переход не может быть меньше 500 🍆 ❌"))
         return;
       }
     }
@@ -446,6 +457,11 @@ const nextButtonChangeState = () => {
                 <input type="number" id="fname" :style="{ width: '70%', color:'white' }" name="fname" v-model="newWhaleData.balance">
                 <div v-if='isNextButton'>
                     <button class="mypost-button" :style="{ marginTop: '30px' }" @click="createNewWhale()">Создать</button>
+                </div>
+                <div v-if="channelsStore.whales?.findIndex(x => x.user_id == myUserId) != -1" :style="{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', marginTop:'15px' }">
+                    <div :style="{ textAlign:'center' }">
+                       <span :style="{ fontSize:'16px' }">⚠️ Стоимость создания рекламного канала будет {{ (channelsStore.whales ? channelsStore.whales.filter(x => x.user_id == myUserId).length * 10000 : 0) }}🍆, т.к вы уже имеете {{ (channelsStore.whales ? channelsStore.whales.filter(x => x.user_id == myUserId).length : 0) }} канала ⚠️</span>
+                    </div>
                 </div>
             </div>
 
@@ -531,11 +547,11 @@ const nextButtonChangeState = () => {
             <div v-if="popupState == 'visible' && selectedChannel.owner_id == myUserId" class="popup-body">
                 <p v-if="myChannelPopupState == 'view'">Этот канал принадлежит вам</p>
                 <p v-if="myChannelPopupState == 'view'">Награда за переход: 🍆{{ selectedChannel.reward }}</p>
-                <p v-if="myChannelPopupState == 'view'">Оставшийся баланс кита: 🍆{{ selectedChannel.balance }}</p>
+                <p v-if="myChannelPopupState == 'view'">Оставшийся баланс рекламы: 🍆{{ selectedChannel.balance }}</p>
                 <div v-if="myChannelPopupState == 'view'" :style="{ marginTop: '15px' }">
                   <button class="boost-purchase-button" @click="stopActiveChannel(selectedChannel.id)">{{ selectedChannel.available ? 'Остановить' : 'Включить' }}</button>
                   <button class="boost-purchase-button" @click="myChannelPopupState = 'topUp'" :style="{marginTop:'15px'}">Пополнить</button>
-                  <button v-if="!selectedChannel.available && (userStore.user?.balance != undefined && userStore.user?.balance <= selectedChannel.reward)" class="boost-purchase-button" :style="{marginTop:'15px'}" @click="deleteUserWhale(selectedChannel.id)">Удалить</button>
+                  <button class="boost-purchase-button" :style="{marginTop:'15px'}" @click="deleteUserWhale(selectedChannel.id)">Удалить</button>
                 </div>
                 <div v-else :style="{ marginTop: '15px' }">
                   <span>Насколько желаете пополнить кита?🐳</span>
@@ -578,6 +594,11 @@ input[type=text] {
   border: none;
   border-bottom: 2px solid;
   background: none;
+}
+
+input:focus {
+  outline: none; /* Убирает стандартную синюю обводку */
+  border: 1px solid #ccc; /* Устанавливает желаемую обводку, если нужно */
 }
 
 input[type="number"] {
