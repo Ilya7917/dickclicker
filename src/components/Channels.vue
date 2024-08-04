@@ -421,7 +421,7 @@ const nextButtonChangeState = () => {
 
 
 
-    <div class="earn-title">
+    <div v-if="pageState != 'create'" class="earn-title">
       🤑 {{ $t("earn.name") }}
     </div>
 
@@ -576,13 +576,13 @@ input[type=text] {
   margin: 30px 0;
   box-sizing: border-box;
   border: none;
-  border-bottom: 2px solid rgb(0, 255, 0);
+  border-bottom: 2px solid;
   background: none;
 }
 
 input[type="number"] {
-            color: white; 
-            text-align: right; 
+  color: white; 
+  text-align: right;
 }
 
 
@@ -615,7 +615,7 @@ input[type=number] {
   margin: 30px 0;
   box-sizing: border-box;
   border: none;
-  border-bottom: 2px solid rgb(0, 255, 0);
+  border-bottom: 2px solid;
   background: none;
 }
 
