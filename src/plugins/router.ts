@@ -23,6 +23,9 @@ const routes = [
     {
         path: '/posts', name: 'posts', component: () => useWebAppPopup().showAlert("In developing 🛠️")
     },
+    {
+        path: '/market', name: 'market', component: () => useWebAppPopup().showAlert("In developing 🛠️")
+    }
 ]
 
 const router = createRouter({

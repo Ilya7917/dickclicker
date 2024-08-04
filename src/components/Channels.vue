@@ -245,35 +245,49 @@ async function createNewWhale() {
     useWebAppPopup().showAlert(t("Invalid Telegram URL format"))
     return;
   }
-
+  
   if(userStore.user != null && newWhaleData.value.balance > userStore.user?.balance) {
-    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в кита"))
+    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в рекламу канала"))
     return;
   }
   
   if(newWhaleData.value.balance == 0){
-    useWebAppPopup().showAlert(t("Баланс кита не может быть 0"))
+    useWebAppPopup().showAlert(t("Баланс кита не может быть 0🍆"))
+    return;
+  }
+
+  if(newWhaleData.value.balance < 10000) {
+    useWebAppPopup().showAlert(t("Баланс кита не может быть меньше 10.000🍆"))
     return;
   }
 
   if(newWhaleData.value.rewared > newWhaleData.value.balance) {
-    useWebAppPopup().showAlert(t("❌ Вы не можете выдавать юзерам больше, чем будет на балансе кита ❌"))
+    useWebAppPopup().showAlert(t("❌ Вы не можете выдавать юзерам больше, чем будет на балансе рекламы канала ❌"))
     return;
   }
-  
+
   if(channelsStore.channels != null) {
      let index = channelsStore.channels.findIndex(x => x.user_id == myUserId.value);
      if(index != -1){
-      useWebAppPopup().showAlert(t("Вы не можете создать больше 1 кита"))
+      useWebAppPopup().showAlert(t("Вы не можете создать больше 1-ой рекламы канала"))
       return;
      }
   }
-  
-
+  isNextButton.value = false;
   channelsStore.createWhale(newWhaleData.value.balance, newWhaleData.value.link, newWhaleData.value.rewared).then(result => {
     if (result) {
       fetchFunction();
       isPopupVisible.value = false;
+      isNextButton.value = true;
+      pageState.value = 'channels';
+      progressPost.value = 0;
+      progressNewPosts.forEach(x => {
+        if(x.id != 0) x.isActive = false;
+      });
+    }
+    else {
+      useWebAppPopup().showAlert(t("🐳 Ошибка при создании канала, попробуйте попытку позже"))
+      isNextButton.value = true;
     }
   });
 }
@@ -342,7 +356,7 @@ const topUpWhaleBalance = (channelId :number) => {
   }
 
   if(userStore.user.balance < updateWhaleBalance.value) {
-    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в кита"))
+    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в рекламу канала"))
     return;
   }
 
@@ -356,15 +370,93 @@ const topUpWhaleBalance = (channelId :number) => {
 
 }
 
+const pageState = ref('channels')
+const progressPost = ref(0);
+
+const changePageState = (state: string) => { 
+  pageState.value = state;
+}
+
+const isNextButton = ref(true);
+const progressNewPosts = [
+    {
+        id: 0,
+        isActive: true,
+        text: "Add link"
+    },
+    {
+        id: 1,
+        isActive: false,
+        text: "Price per transition"
+    },
+    {
+        id: 2,
+        isActive: false,
+        text: "Add balance"
+    }
+]
+
+const nextButtonChangeState = () => {
+    if(progressPost.value == 0) {
+      if (!isValidTelegramUrl(newWhaleData.value.link)) {
+        useWebAppPopup().showAlert(t("Invalid Telegram URL format"))
+        return;
+      }
+    }
+    if(progressPost.value == 1) {
+      if(newWhaleData.value.rewared <= 0) {
+        useWebAppPopup().showAlert(t("❌ Цена за переход не может быть меньше 0 ❌"))
+        return;
+      }
+    }
+    progressPost.value++;
+    progressNewPosts[progressPost.value].isActive = true;
+}
+
 </script>
 
 <template>
 
   <div class="telegram-channels">
+
+
+
     <div class="earn-title">
       🤑 {{ $t("earn.name") }}
     </div>
-    <div :style="{ display:'flex', flexDirection:'column', justifyContent:'space-between' }">
+
+    <div v-if="pageState === 'create'" class="createPostMenu">
+        <button class="mypost-button" :style="{ marginTop: '10px' }" @click="changePageState('channels')">Назад</button>
+        <div :style="{ marginTop:'20px' }">
+            <ul id="progressbar">
+                <li v-for="item in progressNewPosts" :class="item.isActive ? 'active' : ''">{{  item.text }}</li>
+            </ul>
+        </div>
+        <div class="createForm">
+            <div v-if="progressPost === 0" :style="{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center' }">
+              <label for="fname" >Ссылка на канал</label>
+              <input type="text" id="fname" :style="{ width: '70%', color:'white'}" name="fname" v-model="newWhaleData.link">
+            </div>
+            <div v-if="progressPost === 1" :style="{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center' }">
+              <label for="fname" >Цена за переход</label>
+              <input type="number" id="fname" :style="{ width: '70%', color:'white' }" name="fname" v-model="newWhaleData.rewared">
+            </div>
+            <div v-if="progressPost === 2" :style="{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center' }">
+                <label for="fname" >Баланс рекламного канала</label>
+                <input type="number" id="fname" :style="{ width: '70%', color:'white' }" name="fname" v-model="newWhaleData.balance">
+                <div v-if='isNextButton'>
+                    <button class="mypost-button" :style="{ marginTop: '30px' }" @click="createNewWhale()">Создать</button>
+                </div>
+            </div>
+
+            
+        </div>
+        <div v-if="progressPost < 2" :style="{ display:'flex', justifyContent:'center' }">
+            <button class="mypost-button" :style="{ marginTop: '30px' }" @click="nextButtonChangeState">Дальше</button>
+        </div>
+    </div>
+
+    <div v-if="pageState == 'channels'" :style="{ display:'flex', flexDirection:'column', justifyContent:'space-between' }">
         <div :style="{ height:'40vh' }">
           <div class="channels-title">
             📢 {{ $t("earn.channels") }}
@@ -392,7 +484,7 @@ const topUpWhaleBalance = (channelId :number) => {
             <div class="channels-title">
               🐳 {{ $t("whales.channels") }}
             </div>
-            <div :style="{display: 'flex', alignItems:'center'}" @click="openCreateWhaleForm">
+            <div :style="{display: 'flex', alignItems:'center'}" @click="changePageState('create')">
               <img :src="AddIcon" alt="Your Icon" :style="{ height: '45px', marginRight:'7px' }" />
             </div>
           </div>
@@ -486,6 +578,23 @@ input[type=text] {
   border: none;
   border-bottom: 2px solid rgb(0, 255, 0);
   background: none;
+}
+
+input[type="number"] {
+            color: white; 
+            text-align: right; 
+}
+
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .mypost-button {
@@ -656,4 +765,57 @@ input[type=number] {
     margin-left: 5px;
     font-size: 12px;
 }
+
+
+/*progressbar*/
+#progressbar {
+  margin-bottom: 30px;
+  overflow: hidden;
+  /*CSS counters to number the steps*/
+  counter-reset: step;
+  text-align: center;
+}
+#progressbar li {
+  list-style-type: none;
+  color: white;
+  text-transform: uppercase;
+  font-size: 9px;
+  width: 33.33%;
+  float: left;
+  position: relative;
+}
+#progressbar li:before {
+  content: counter(step);
+  counter-increment: step;
+  width: 20px;
+  line-height: 20px;
+  display: block;
+  font-size: 10px;
+  color: #333;
+  background: white;
+  border-radius: 3px;
+  margin: 0 auto 5px auto;
+}
+/*progressbar connectors*/
+#progressbar li:after {
+  content: '';
+  width: 100%;
+  height: 2px;
+  background: white;
+  position: absolute;
+  left: -50%;
+  top: 9px;
+  z-index: -1; /*put it behind the numbers*/
+}
+#progressbar li:first-child:after {
+  /*connector not needed before the first step*/
+  content: none; 
+}
+/*marking active/completed steps green*/
+/*The number of the step and the connector before it = green*/
+#progressbar li.active:before,  #progressbar li.active:after{
+  background: #27AE60;
+  color: white;
+}
+
 </style>

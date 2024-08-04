@@ -23,7 +23,8 @@ const messages = {
       skins: "Skins",
       posts: "Posts",
       boosts: "Boosts",
-      referrals: "Referrals"
+      referrals: "Referrals",
+      market: 'Market'
     },
     top: {
       day: "Day",
@@ -109,6 +110,7 @@ const messages = {
       posts: "Посты",
       boosts: "Бустеры",
       referrals: "Рефералы",
+      market: 'Маркет'
     },
     top: {
       day: "День",
