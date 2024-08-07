@@ -186,13 +186,11 @@ const nextButtonChangeState = () => {
 
 const uploadPostState = ref(false);
 const createNewPost = () => {
-    /*
     if(!userStore.user) return;
     if(userStore.user.balance < 5000) {
         useWebAppPopup().showAlert("Недостаточно 🍆 для создания поста");
         return;
     }
-    */
     newPosts.value.isPrivate = isPostOptionsSet.value;
     if (newPosts.value.image != null) {
         const newPost = {
