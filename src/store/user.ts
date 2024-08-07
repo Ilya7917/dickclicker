@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { useWebAppPopup } from 'vue-tg'
+import { id } from 'date-fns/locale';
 
 export interface User {
     id: number;
@@ -56,6 +56,8 @@ export interface newPost {
     isPrivate: boolean;
     description: string;
     price: number;
+    type: string;
+    votePrice: number;
 }
 
 export interface allPosts {
@@ -68,6 +70,10 @@ export interface allPosts {
     Description: string;
     Price: number;
     Donated: number;
+    Type: string;
+    VotePrice: number;
+    VoteYes: number;
+    VoteNo: number;
 }
 
 export interface boughtPosts {
@@ -239,6 +245,8 @@ export const useUserStore = defineStore('user', {
             formData.append('isPrivate', post.isPrivate.toString()); // Преобразование булевого значения в строку
             formData.append('description',post.description);
             formData.append('price', post.price.toString()); // Преобразование числа в строку
+            formData.append('type', post.type == '' ? "donated" : post.type)
+            formData.append('votePrice', post.votePrice.toString())
         
             const response = await fetch(`${import.meta.env.VITE_API_HOST}/createPost`, {
                 method: 'POST',
@@ -254,6 +262,25 @@ export const useUserStore = defineStore('user', {
                 return true;
               }
               return false;
+        },
+        async votePost(postId: number, voteType: string){
+            if(!this.user) return;
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/votePost`,
+                {
+                   id: postId,
+                   vote_type: voteType
+                },
+                {
+                  headers: {
+                    'x-api-key': this.user.access_token,
+                  }
+                }
+            );
+            if(response.data.sucess) {
+                this.user = response.data.user
+                return true;
+            } 
         },
         async getMyPostsBalance() {
             if(!this.user) return;
