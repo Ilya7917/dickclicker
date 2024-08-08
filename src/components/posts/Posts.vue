@@ -402,6 +402,10 @@ const votePost = (postId: number, voteType: string, votePrice:number) => {
     })
 }
 
+const handleEnter = (event: KeyboardEvent) => {
+  (event.target as HTMLInputElement).blur();
+};
+
 </script>
 
 <template>
@@ -431,7 +435,7 @@ const votePost = (postId: number, voteType: string, votePrice:number) => {
             </div>
             <div v-if="progressPost === 1" :style="{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center' }">
                 <label for="fname">Описание(не обязательно)</label>
-                <input type="text" id="fname" @change="onAddDescription" name="fname">
+                <input v-click-outside="handleEnter" type="text" id="fname" @change="onAddDescription" name="fname">
             </div>
             <div v-if="progressPost === 2" :style="{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center' }">
                 <div v-if="newPosts.type != 'vote'" :style="{ display: 'flex', alignItems:'center'}">
@@ -443,11 +447,11 @@ const votePost = (postId: number, voteType: string, votePrice:number) => {
                 </div>
                 <div v-if="newPosts.type == 'vote'" :style="{ display: 'flex', alignItems:'center', flexDirection:'column'}">
                     <span :style="{ fontSize: '15px', fontWeight:'bold'}">Цена голосования (в 🍆):</span>
-                    <input type="number" @keydown.enter="createNewPost" v-model="newPosts.votePrice" :style="{ width:'100%' }"/>
+                    <input v-click-outside="handleEnter" type="number" @keydown.enter="createNewPost" v-model="newPosts.votePrice" :style="{ width:'100%' }"/>
                 </div>
                 <div v-if="isPostOptionsSet" :style="{ marginTop: '50px', textAlign:'center'}">
                         <span :style="{ fontSize: '15px', fontWeight:'bold'}">Цена за разблокировку:</span>
-                        <input type="number" @keydown.enter="createNewPost" v-model="newPosts.price"/>
+                        <input v-click-outside="handleEnter" type="number" @keydown.enter="createNewPost" v-model="newPosts.price"/>
                 </div>
                 <div :style="{ marginTop: '50px', textAlign:'center'}">
                     <span :style="{ fontSize: '15px', fontWeight:'bold'}">Стоимость создания поста: 5000🍆</span>
@@ -588,6 +592,7 @@ input[type=text] {
   padding: 12px 20px;
   margin: 30px 0;
   box-sizing: border-box;
+  color: white;
   border: none;
   border-bottom: 2px solid;
   background: none;

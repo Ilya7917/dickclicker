@@ -1,15 +1,13 @@
 <template>
   <div class="energy-section">
-    <div :style="{ display:'flex', alignItems:'flex-end', width:'100%', flexDirection:'column' }">
-      <div :style="{ marginRight:'15px', marginBottom:'15px'}">
+    <div ref="skinsRef" :style="{ right:'15px', position:'fixed' }">
         <router-link class="menu-item" :style="{ fontSize: '35px'}" to="/skins" tag="button">
           🍆
           <span>{{ $t("bottomMenu.skins") }}</span>
         </router-link>
-      </div>
     </div>
 
-    <div class="energy">
+    <div ref="energyRef" class="energy">
       <div class="energy-progress-bar">
       <div class="energy-progress" :style="{ width: ((userStore.user?.energy ?? 0) / (1000 + (userStore.user?.max_energy_level ?? 0) * 500) * 100) + '%' }"></div>
     </div>
@@ -58,8 +56,23 @@
 
 <script lang="ts" setup>
 import { useUserStore } from '@/store/user';
+import { onMounted, ref } from 'vue';
 
 const userStore = useUserStore()
+
+const energyRef = ref<HTMLElement | null>(null);
+const skinsRef = ref<HTMLElement | null>(null);
+
+const updatePosition = () => {
+  if (energyRef.value && skinsRef.value) {
+    const energyRect = energyRef.value.getBoundingClientRect();
+    skinsRef.value.style.bottom = `${window.innerHeight - energyRect.top + 20}px`;
+  }
+};
+
+onMounted(async () => {
+  updatePosition();
+});
 </script>
 
 <style scoped>

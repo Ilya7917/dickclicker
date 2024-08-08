@@ -6,6 +6,7 @@ import BottomMenu from './BottomMenu.vue';
 import { useUserStore } from '@/store/user';
 import { skins } from './skins/skinBase';
 
+
 const userStore = useUserStore()
 
 const { getCurrentSkin } = userStore
@@ -46,11 +47,18 @@ const isMobileDevice = () => {
     return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 };
 const createFlyingNumber = (farm: number, x: number, y: number) => {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = `${x}px`;
+    container.style.top = `${y}px`;
+    container.style.display = 'flex';
+    container.style.alignItems = 'center'; // Вертикальное выравнивание элементов
+    container.style.justifyContent = 'center'; // Горизонтальное выравнивание элементов
+    container.style.transform = 'translate(-50%, -50%)'; // Центрирование
+
+
     const numberEl = document.createElement('div');
     numberEl.textContent = farm.toString(); // Тут може бути будь-яке число або текст
-    numberEl.style.position = 'absolute';
-    numberEl.style.left = `${x}px`;
-    numberEl.style.top = `${y}px`;
     if (userStore.user && userStore.user.is_premium) {
         numberEl.style.color = '#ff9900';
     } else {
@@ -59,14 +67,24 @@ const createFlyingNumber = (farm: number, x: number, y: number) => {
     numberEl.style.userSelect = 'none';
     numberEl.style.pointerEvents = 'none';
     numberEl.style.fontSize = '40px';
-    numberEl.style.transform = 'translate(-50%, -50%)'; // Центрування відносно координат натискання
     numberEl.classList.add('flying-number');
 
-    numbersContainerRef.value?.appendChild(numberEl);
+    const imageEl = document.createElement('img');
+    imageEl.src = getSkin(); // Замените на путь к вашему изображению
+    imageEl.style.width = '35px';
+    imageEl.style.height = '35px';
+    imageEl.style.marginLeft = '50px';
+    imageEl.style.marginRight = '8px'; // Отступ между картинкой и числом  
+    imageEl.classList.add('flying-number');
+
+    container.appendChild(imageEl);
+    container.appendChild(numberEl);
+
+    numbersContainerRef.value?.appendChild(container);
 
     // Видаляємо елемент після анімації
     setTimeout(() => {
-        numberEl.remove();
+        container.remove();
     }, 1000); // Тривалість анімації
 };
 
@@ -101,7 +119,7 @@ const applyTilt = (event: MouseEvent | TouchEvent) => {
     const numbersContainerRect = numbersContainerRef.value?.getBoundingClientRect();
     const relativeX = clientX - (numbersContainerRect?.left ?? 0);
     const relativeY = clientY - (numbersContainerRect?.top ?? 0);
-
+    
 
     if (userStore.user.energy > userStore.user.mine_level) {
         userStore.mineCoins();
@@ -113,7 +131,6 @@ const applyTilt = (event: MouseEvent | TouchEvent) => {
         useWebAppHapticFeedback().impactOccurred("light");
         onUserClick()
     }
-
     // const coinRect = coinRef.value.getBoundingClientRect();
     // const coinCenterX = coinRect.left + coinRect.width / 2;
     // const coinCenterY = coinRect.top + coinRect.height / 2;
