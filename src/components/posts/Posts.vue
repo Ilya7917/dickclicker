@@ -276,6 +276,9 @@ const checkIfCanUnlockPost = (postId: number, ownerId: number) => {
                 return true;
             }
         }
+        else {
+            return true;
+        }
     }
 }
 
