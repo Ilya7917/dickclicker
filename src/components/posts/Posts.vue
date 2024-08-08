@@ -187,7 +187,7 @@ const nextButtonChangeState = () => {
 const uploadPostState = ref(false);
 const createNewPost = () => {
     if(!userStore.user) return;
-    if(userStore.user.balance < 5000) {
+    if(userStore.user.balance < 1000) {
         useWebAppPopup().showAlert("Недостаточно 🍆 для создания поста");
         return;
     }
@@ -454,7 +454,7 @@ const handleEnter = (event: KeyboardEvent) => {
                         <input v-click-outside="handleEnter" type="number" @keydown.enter="createNewPost" v-model="newPosts.price"/>
                 </div>
                 <div :style="{ marginTop: '50px', textAlign:'center'}">
-                    <span :style="{ fontSize: '15px', fontWeight:'bold'}">Стоимость создания поста: 5000🍆</span>
+                    <span :style="{ fontSize: '15px', fontWeight:'bold'}">Стоимость создания поста: 1000🍆</span>
                 </div>
                 <div>
                     <button class="mypost-button" :style="{ marginTop: '30px' }" @click="createNewPost">Создать</button>
@@ -484,7 +484,7 @@ const handleEnter = (event: KeyboardEvent) => {
                         <span :style="{ fontSize: '25px', marginLeft: '15px' }">{{ post.OwnerName }}</span>
                     </div>
                     <div class="postImage" :style="{ height: '250px', width:'100%', position: 'relative',  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >
-                        <img :src="getImageUrl(post.ImagePath)" :style="{ height: 'inherit', width:'100%', backgroundRepeat: 'no-repeat', backgroundSize: 'cover', objectFit:'contain'}" />
+                        <img :src="post.ImagePath" :style="{ height: 'inherit', width:'100%', backgroundRepeat: 'no-repeat', backgroundSize: 'cover', objectFit:'contain'}" />
                     </div>
                     <div class="postDescription" :style="{ height: '50px', alignItems: 'center', display:'flex' }">
                         <span :style="{ fontSize: '25px' }">{{ post.Description }}</span>
@@ -543,7 +543,7 @@ const handleEnter = (event: KeyboardEvent) => {
                 <button v-if="donatedValue > 0" class="boost-purchase-button" :style="{ width:'100%'}" @click="donateToPost">Donate post</button>
             </div>
             <div v-if="popupState == 'visible'">
-                <img :src="getImageUrl(currentPost.imagePath)" :style="{ height: '200px', width:'100%', backgroundRepeat: 'no-repeat', objectFit:'contain'}" />
+                <img :src="currentPost.imagePath" :style="{ height: '200px', width:'100%', backgroundRepeat: 'no-repeat', objectFit:'contain'}" />
                 <p v-if="currentPost.decription !== ''">{{ currentPost.decription }}</p>
                 <p>Donated: 🍆{{ currentPost.donated }}</p>
             </div>
