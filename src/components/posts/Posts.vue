@@ -262,16 +262,17 @@ const unlockNewPost = () => {
 
 const checkIfCanUnlockPost = (postId: number, ownerId: number) => {
     if(!userStore.user) return;
+    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].Type != 'donated') return false;
     if(userStore.user.id == ownerId) return false;
+    if(userStore.posts != null && !userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].IsPrivate) return false;
+    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].IsPrivate) return true;
+    if(userStore.boughtPosts != null && userStore.boughtPosts.length < 0) return true;
     if(userStore.boughtPosts != null && userStore.boughtPosts?.length > 0) {
         if(userStore.boughtPosts.findIndex(x => x.ID == postId) != -1){
             return false;
         }
-        if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].IsPrivate) return true;
         return true;
     }
-    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].IsPrivate) return true;
-    if(userStore.boughtPosts != null && userStore.boughtPosts.length < 0) return true;
 
 }
 
