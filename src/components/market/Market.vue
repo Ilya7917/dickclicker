@@ -420,7 +420,7 @@ const finishOrder = () => {
           <button class="boost-purchase-button" :style="{ width:'70%', backgroundColor:'#3f8b1e' }" @click="createOrderMember()">Продать 🍆 {{ selectedOrder?.OwnerName }}`y</button>
         </div>
         <div v-if="selectedOrder?.Status != 'closed'">
-          <div v-if="membersOfOrder != undefined && membersOfOrder?.findIndex(x => x.UserID == myUserId) != -1 && membersOfOrder?.length > 0" :style="{ display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', marginTop:'30px' }">
+          <div v-if="membersOfOrder != undefined && membersOfOrder?.findIndex(x => x.UserID == myUserId) !== -1" :style="{ display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', marginTop:'30px' }">
             <span v-if="selectedOrder?.Status == 'active'">Ваш запрос успешно создан, вы начнёте сделку, когда пользователь {{ selectedOrder?.OwnerName }} примет ваш запрос</span>
             <div v-else> 
               <span :style="{ fontSize:'19px' }">{{ selectedOrder?.OwnerName }} принял ваш запрос на сделку</span>
