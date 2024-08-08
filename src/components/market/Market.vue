@@ -18,22 +18,9 @@ const isCanView = ref(false);
 
 const userStore = useUserStore();
 const marketStore = useMarketStore();
-const { getChannels } = channelsStore;
 
 const myUserId = ref(0);
 
-const selectedChannel = ref({
-    id: 0,
-    title: "",
-    reward: 0,
-    balance: 0,
-    invite_link: "",
-    status: "",
-    createdAt: "",
-    owner_id: 0,
-    available: false,
-    is_available: false,
-});
 
 const fetchFunction = () => {
   marketStore.fetchAllActiveOrders().then(status => {
@@ -89,39 +76,6 @@ onMounted(() => {
   }
 });
 
-const onPressStartButton = () => {
-  
-  const channel =  {
-    id: selectedChannel.value.id,
-    title: selectedChannel.value.title,
-    invite_link: selectedChannel.value.invite_link,
-    available: true,
-    reward: 0,
-    balance: 0,
-    is_available: true,
-    channel_avatar: '',
-    is_whale: false,
-    user_id: 0
-  }
-
-  channelsStore.startChannel(channel).then(result => {
-    if(result)
-    {
-        isPopupVisible.value = false;
-        channelsStore.getMyChannels();  
-        try{
-          wn.openTelegramLink(selectedChannel.value.invite_link)
-        }
-        catch{
-          console.log("Err");
-        }
-    }
-  })
-}
-
-const reOpenPopup = () => {
-  isPopupVisible.value = true;
-};
 
 function closePopup() {
   if(popupState.value == 'create') return;
@@ -133,39 +87,6 @@ function closePopup() {
 const popupState = ref("visible");
 
 
-const newWhaleData = ref({
-  balance: 0,
-  link: "",
-  rewared: 0,
-})
-
-
-const myChannelPopupState = ref('view');
-
-const updateWhaleBalance = ref(0);
-
-const topUpWhaleBalance = (channelId :number) => {
-  if(userStore.user == null) return;
-
-  if(updateWhaleBalance.value == 0) {
-    useWebAppPopup().showAlert(t("Нельзя пополнить на 0 🍆"))
-    return;
-  }
-
-  if(userStore.user.balance < updateWhaleBalance.value) {
-    useWebAppPopup().showAlert(t("У вас недостаточно 🍆 чтобы поместить их в рекламу канала"))
-    return;
-  }
-
-  channelsStore.topUpWhale(channelId, updateWhaleBalance.value).then(result => {
-    if(result) {
-       isPopupVisible.value = false;
-       myChannelPopupState.value = 'view';
-       fetchFunction();
-    }
-  })
-
-}
 
 const pageState = ref('market')
 const progressPost = ref(0);
@@ -262,6 +183,14 @@ const getPaymentMethodNameBySuffix = (pName: string) => {
 }
 
 const createNewOrder = () => {
+  if(newMarketItem.value.amount <= 0) {
+    useWebAppPopup().showAlert("❌ Ошибка. Нельзя создать сделку с 0 количеством коинов")
+  }
+
+  if(newMarketItem.value.paymentMethods.length == 0) {
+    useWebAppPopup().showAlert("❌ Ошибка. Нужно добавить хотя бы 1 метод оплаты")
+  }
+
   marketStore.createNewOrder(newMarketItem.value).then(() => {
     fetchFunction();
       pageState.value = 'market';
