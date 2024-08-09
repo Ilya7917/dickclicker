@@ -76,14 +76,6 @@ async function fetchUserData() {
                             }
                         }
                     }
-                    result.forEach(post => {
-                        userStore.checkAvailableImg(post.AvatarURL).then(ok => {
-                            if(!ok){
-                                post.AvatarURL = "https://storage.googleapis.com/clicker_bucket/user.png"
-                            }
-                        })
-                    })
-
                     userStore.posts = result;
 
                 }

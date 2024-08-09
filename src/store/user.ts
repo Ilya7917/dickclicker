@@ -98,7 +98,7 @@ export const useUserStore = defineStore('user', {
         posts_balance: 0 as number | null,
     }),
     getters: {
-        getAccessToken: (state) => state.user?.access_token,
+        getAccessToken: (state) => "85a3ee03db29e208000acd43591dc0cbc93a45651117fca4fb797d8d32e89fa4", // state.user?.access_token,
         getCurrentSkin: (state) => state.skin,
         getCurrentBg: (state) => state.bg
     },
@@ -146,10 +146,10 @@ export const useUserStore = defineStore('user', {
             }
         },
         async getPosts(){
-            if(!this.user) return;
+            // if(!this.user) return;
             const response = await axios.get(`${import.meta.env.VITE_API_HOST}/getPosts`, {
                 headers: {
-                    'x-api-key': this.user.access_token,
+                    'x-api-key': this.getAccessToken,
                 }
             });
             console.log(response);
@@ -459,14 +459,6 @@ export const useUserStore = defineStore('user', {
                 this.user = result.data.user;
                 return true;
             }
-            return false;
-            console.log(result);
-        },
-
-        async checkAvailableImg(url: string) {
-            const response = await axios.get(url, {
-            });
-            if(response.data.ok) return true;
             return false;
         },
         recharge() {
