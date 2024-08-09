@@ -11,6 +11,7 @@ import {useWebAppViewport, useWebApp, useWebAppBackButton, useWebAppTheme, useWe
 import moment from 'moment';
 import { useI18n } from 'vue-i18n';
 import { Interface } from 'readline';
+import axios from 'axios';
 const { t } = useI18n();
 const userStore = useUserStore()
 userStore.getBoosts()
@@ -50,7 +51,6 @@ const progressNewPosts = [
     }
 ]
 
-
 async function fetchUserData() {
     try {
         await Promise.all([
@@ -77,6 +77,14 @@ async function fetchUserData() {
                         }
                     }
                     userStore.posts = result;
+                    
+                    userStore.posts.forEach(post => {
+                        const result = checkImg(post.AvatarURL)
+                        if (!result) {
+                            post.AvatarURL = "https://storage.googleapis.com/clicker_bucket/user.png"
+                        }
+                    })
+
                 }
             }),
             userStore.getMyPosts(),
@@ -394,6 +402,14 @@ const handleEnter = (event: KeyboardEvent) => {
   (event.target as HTMLInputElement).blur();
 };
 
+async function checkImg(url: string): Promise<boolean> {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
 </script>
 
 <template>
@@ -462,10 +478,10 @@ const handleEnter = (event: KeyboardEvent) => {
     </div>
 
     <div v-if="pageState === 'posts'" class="boosts">
-        <div v-for="post in userStore.posts" :key="post.ID" :style="{ width: '100%' }">
+        <div v-for="(post, index) in userStore.posts" :key="post.ID" :style="{ width: '100%' }">
                 <div class="post">
                     <div class="ownerData">
-                        <img :src="post.AvatarURL.trim() != '' ? post.AvatarURL : 'https://storage.googleapis.com/clicker_bucket/user.png'"/>
+                        <img :src="post.AvatarURL"/>
                         <span>{{ post.OwnerName }}</span>
                     </div>
                     <div class="postImage" :style="{  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >

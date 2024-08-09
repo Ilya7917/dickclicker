@@ -462,6 +462,13 @@ export const useUserStore = defineStore('user', {
             return false;
             console.log(result);
         },
+
+        async checkAvailableImg(url: string) {
+            const response = await axios.get(url, {
+            });
+            if(response.data.ok) return true;
+            return false;
+        },
         recharge() {
             if (this.user) {
                 if (this.user.energy + this.user.energy_level > (1000 + this.user.max_energy_level * 500)) {
