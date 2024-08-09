@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import {Channel, useChannelsStore} from '@/store/channel';
 import { useWebAppNavigation } from 'vue-tg'
 import { onMounted, ref } from "vue";
-import { differenceInHours } from 'date-fns';
 import { useWebAppPopup } from 'vue-tg'
 import { useI18n } from 'vue-i18n';
 import AddIcon from "@/assets/images/addIcon.svg";
 import { useUserStore } from '@/store/user';
 import { useMarketStore } from '@/store/marketstore'
+
+import MarketItem from './MarketItem.vue';
+
 const { t } = useI18n();
 
-const channelsStore = useChannelsStore();
-const wn = useWebAppNavigation()
+const wn = useWebAppNavigation();
 const isPopupVisible = ref(false);
 const popupVisibleState = ref('member')
 const isCanView = ref(false);
@@ -193,6 +193,11 @@ const createNewOrder = () => {
     useWebAppPopup().showAlert("❌ Ошибка. Нужно добавить хотя бы 1 метод оплаты")
   }
 
+  if(userStore.user?.username == null || userStore.user.username == undefined || userStore.user.username.trim() === ''){
+    useWebAppPopup().showAlert("❌ Ошибка. У вас отсутствует ссылка на профиль, перейдите в настройки telegram и в поле 'имя пользователя' впишите своё имя пользователя. Иначе участники маркета не смогут с вами связаться.❌ \n ⚠️ Обязательно перезапустите кликер ⚠️")
+    return;
+  }
+
   marketStore.createNewOrder(newMarketItem.value).then(() => {
     fetchFunction();
       pageState.value = 'market';
@@ -212,7 +217,13 @@ const changeVisibleState = (state :string, order :order) => {
 }
 
 const createOrderMember = () => {
-  /* проверка баланса пользователя и самого пользователя */
+  
+  if(userStore.user == null) return;
+  if(selectedOrder.value?.Amount != null && userStore.user.balance < selectedOrder.value.Amount) {
+    useWebAppPopup().showAlert(`⚠️ У вас недостаточно 🍆 чтобы продать их ${selectedOrder.value.OwnerName} ⚠️`)
+    return;
+  }
+
   if(selectedOrder != null && selectedOrder.value?.ID != undefined){
     canShowStartOrderButton.value = false;
     marketStore.createOrderMember(selectedOrder.value?.ID, selectedOrder.value.OwnerID).then(status => {
@@ -340,55 +351,8 @@ const finishOrder = () => {
               <img :src="AddIcon" alt="Your Icon" :style="{ height: '45px', marginRight:'15px' }" />
           </div>
           <div v-if="isCanView" class="channels-list">
-            <div id="MyOrders" v-for="order in marketStore.myOrders" :key="order.ID" @click="" class="channel">
-              <div class="channel-info" :style="{ display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center' }">
-                <img v-if="order.OwnerAvatar != null && order.OwnerAvatar != ''" :src="order.OwnerAvatar" :style="{ height:'30px', borderRadius:'100px'}" />
-                <div v-else :style="{ height:'30px', width:'30px', borderRadius:'100px', background:'gray', justifyContent:'center', alignItems:'center', display:'flex' }">👤</div>
-                <span class="name" :style="{ marginLeft:'10px', fontSize:'18px' }">{{ order.OwnerName }}</span>
-              </div>
-              <div @click="order.OwnerID !== myUserId ? changeVisibleState('order', order) : changeVisibleState('me', order)">
-                <div v-if="order.OwnerID !== myUserId" :style="{ display:'flex', flexDirection:'column'}">
-                  <span v-if="order.Status == 'active'" :style="{ fontSize:'17px' }">хочет купить {{ order.Amount }}🍆 за {{ order.Price }}💲</span>
-                  <span v-if="order.Status == 'progress'">сделка в процессе ⏳</span>
-                  <span v-else>сделка закрыта ✅</span>
-                  <div v-if="order.Status != 'closed'" :style="{ display:'flex', flexDirection:'column' }">
-                    <div v-for="method in order.PaymentMethods" :style="{ border:'3.5px solid gray', width:'170px', textAlign:'center', marginTop:'7px' }">
-                      <span>{{ getPaymentMethodNameBySuffix(method) }}</span>
-                    </div>
-                  </div>  
-                </div>
-                <span v-else :style="{ fontSize:'20px' }">{{ order.Status == "active" || order.Status == "progress" ? `ваша сделка 👑 ${ order.Status == 'progress' ? "⏳" : '' }` : "сделка закрыта ✅" }} </span>
-              </div>
-              <div class="channel-action">
-                <svg class="arrow">
-                  <use xlink:href="@/assets/images/sprite.svg#chevron-right"></use>
-                </svg>
-              </div>
-            </div>
-            <div id="AllOrders" v-for="order in marketStore.orders" :key="order.ID" @click="" class="channel">
-              <div class="channel-info" :style="{ display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center' }">
-                <img v-if="order.OwnerAvatar != null && order.OwnerAvatar != ''" :src="order.OwnerAvatar" :style="{ height:'30px', borderRadius:'100px'}" />
-                <div v-else :style="{ height:'30px', width:'30px', borderRadius:'100px', background:'gray', justifyContent:'center', alignItems:'center', display:'flex' }">👤</div>
-                <span class="name" :style="{ marginLeft:'10px', fontSize:'18px' }">{{ order.OwnerName }}</span>
-              </div>
-              <div @click="order.OwnerID !== myUserId ? changeVisibleState('order', order) : changeVisibleState('me', order)">
-                <div v-if="order.OwnerID !== myUserId" :style="{ display:'flex', flexDirection:'column'}">
-                  <span v-if="order.Status == 'active'" :style="{ fontSize:'17px' }">хочет купить {{ order.Amount }}🍆 за {{ order.Price }}💲</span>
-                  <span v-else>сделка в процессе ⏳</span>
-                  <div :style="{ display:'flex', flexDirection:'column' }">
-                    <div v-for="method in order.PaymentMethods" :style="{ border:'3.5px solid gray', width:'170px', textAlign:'center', marginTop:'7px' }">
-                      <span>{{ getPaymentMethodNameBySuffix(method) }}</span>
-                    </div>
-                  </div>  
-                </div>
-                <span v-else :style="{ fontSize:'20px' }">ваша сделка 👑 {{ order.Status == 'progress' ? "⏳" : '' }}</span>
-              </div>
-              <div class="channel-action">
-                <svg class="arrow">
-                  <use xlink:href="@/assets/images/sprite.svg#chevron-right"></use>
-                </svg>
-              </div>
-            </div>
+            <MarketItem :orders="marketStore.myOrders != undefined ? marketStore.myOrders : []" :myUserId="myUserId" :changeVisibleState="changeVisibleState" :getPaymentMethodNameBySuffix="getPaymentMethodNameBySuffix" />
+            <MarketItem :orders="marketStore.orders != undefined ? marketStore.orders : []" :myUserId="myUserId" :changeVisibleState="changeVisibleState" :getPaymentMethodNameBySuffix="getPaymentMethodNameBySuffix" />
           </div>
         </div>
     </div>
@@ -602,27 +566,6 @@ input[type=number] {
     display: flex;
     flex-direction: column;
     backdrop-filter: blur(5px);
-}
-.channel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px;
-  background: rgba(128, 128, 128, 0.1);
-  color: #fff;
-  padding: 20px 10px;
-  border-radius: 8px;
-}
-
-.channel-disable {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px;
-  background: rgba(171, 10, 10, 0.1);
-  color: #fff;
-  padding: 20px 10px;
-  border-radius: 8px;
 }
 
 .earn-title {

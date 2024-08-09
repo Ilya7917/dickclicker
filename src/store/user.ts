@@ -7,6 +7,7 @@ export interface User {
     balance: number;
     post_balance: number;
     first_name: string;
+    username: string;
     language_code: string;
     energy: number;
     energy_level: number;
@@ -153,6 +154,8 @@ export const useUserStore = defineStore('user', {
             });
             console.log(response);
             this.posts = response.data;
+            if(response.data.length > 0) return true;
+            return false;
             
         },
         async exchangeDonateMoney(amount: number) {

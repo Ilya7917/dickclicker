@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import { useUserStore } from '@/store/user';
+import { allPosts, UserWithBoosts, useUserStore } from '@/store/user';
 import { onMounted, ref } from 'vue';
 import loadingIcon from "@/assets/images/loading.svg";
 import AcceptIcon from "@/assets/images/acceptet.svg";
-import AddIcon from "@/assets/images/addIcon.svg";
 import DonateBalance from '../account/DonateBalance.vue';
+import NavMenu from './NavMenu.vue';
 import { useWebAppPopup } from 'vue-tg'
 import question from "@/assets/images/question.svg";
 import {useWebAppViewport, useWebApp, useWebAppBackButton, useWebAppTheme, useWebAppClosingConfirmation} from 'vue-tg'
 import moment from 'moment';
 import { useI18n } from 'vue-i18n';
+import { Interface } from 'readline';
 const { t } = useI18n();
 const userStore = useUserStore()
 userStore.getBoosts()
@@ -50,22 +51,46 @@ const progressNewPosts = [
 ]
 
 
-/* skinArea */
-import { kStringMaxLength } from 'buffer';
-import { isAbsolute } from 'path';
-import { create } from 'domain';
-const { setSkin, getCurrentSkin } = userStore;
+async function fetchUserData() {
+    try {
+        await Promise.all([
+            userStore.getMyBoughtPosts(),
+            userStore.getPosts().then(ok => {
+                if(ok) {
+                    if(userStore.posts == null) return;
+                    const donatePosts: allPosts[] = userStore.posts.filter(post => post.Type === 'donate');
+                    const votePosts: allPosts[] = userStore.posts.filter(post => post.Type === 'vote');
 
+                    const result: allPosts[] = [];
+                    while (donatePosts.length > 0 || votePosts.length > 0) {
+                        if (donatePosts.length > 0) {
+                            const post = donatePosts.shift();
+                            if (post !== undefined) {  // Проверяем, что post не undefined
+                                result.push(post);
+                            }
+                        }
+                        if (votePosts.length > 0) {
+                            const post = votePosts.shift();
+                            if (post !== undefined) {  // Проверяем, что post не undefined
+                                result.push(post);
+                            }
+                        }
+                    }
+                    userStore.posts = result;
+                }
+            }),
+            userStore.getMyPosts(),
+            userStore.getMyPostsBalance()
+        ]);
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    }
+}
 
-
-onMounted(()=>{
+onMounted(() => {
     pageState.value = "posts";
-    userStore.getMyBoughtPosts();
-    userStore.getPosts();
-    userStore.getMyPosts();
-    userStore.getMyPostsBalance();
-    console.log(pageState.value);
-})
+    fetchUserData();
+});
 
 function closePopup() {
   if (justOpened.value) {
@@ -75,50 +100,10 @@ function closePopup() {
   isPopupVisible.value = false;
 }
 
-const selectedSkin = ref({
-    id: 0,
-    price: 1000
-});
-
-const posts = [
-    {
-        id: 0,
-        ownerName: "Jack",
-        ownerAvatar: "https://www.pinclipart.com/picdir/big/165-1653686_female-user-icon-png-download-user-colorful-icon.png",
-        image: "https://goombastomp.com/wp-content/uploads/2022/07/image-34.png",
-        description: "Cat from stray",
-        donation: 5000,
-        isPrivate: false,
-    },
-    {
-        id: 1,
-        ownerName: "Ashley",
-        ownerAvatar: "https://www.pinclipart.com/picdir/big/165-1653686_female-user-icon-png-download-user-colorful-icon.png",
-        image: "https://goombastomp.com/wp-content/uploads/2022/07/image-34.png",
-        description: "Cat from stray",
-        donation: 1582,
-        isPrivate: true
-    },
-    {
-        id: 2,
-        ownerName: "Miki115",
-        ownerAvatar: "https://www.pinclipart.com/picdir/big/165-1653686_female-user-icon-png-download-user-colorful-icon.png",
-        image: "https://goombastomp.com/wp-content/uploads/2022/07/image-34.png",
-        description: "Cat from stray",
-        donation: 113,
-        isPrivate: true
-    }
-]
-
-const mySkin = ref({
-    id: 0
-})
-
-const changePageState = (state: string) => {
-    if(state == pageState.value) return;
-    pageState.value = state
-    console.log(state);
-}
+const handleChangePageState = (state: string) => {
+  if (state === pageState.value) return;
+  pageState.value = state;
+};
 
 const onAddFile = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -413,10 +398,7 @@ const handleEnter = (event: KeyboardEvent) => {
 
 <template>
     <div class="Bg"></div>
-    <div class="navMenu">
-        <button class="mypost-button" @click="changePageState(pageState == 'create' ? 'posts' : pageState == 'myposts' ? 'posts' : 'myposts')">{{ pageState == "create" ? "Posts" : pageState == 'posts' ? "My posts" : 'Posts' }}</button>
-        <img v-if="pageState !== 'create'" :src="AddIcon" alt="Your Icon" :style="{ height: '50px' }" @click="changePageState('create')" />
-    </div>
+    <NavMenu :page-state="pageState" @change-page-state="handleChangePageState" />
     <div v-if="pageState === 'create'" class="createPostMenu">
         <div>
             <ul id="progressbar">
@@ -483,28 +465,28 @@ const handleEnter = (event: KeyboardEvent) => {
         <div v-for="post in userStore.posts" :key="post.ID" :style="{ width: '100%' }">
                 <div class="post">
                     <div class="ownerData">
-                        <img :src="post.AvatarURL" :style="{ width: '60px', height: '60px', padding: '5px', borderRadius: '30px' }"/>
-                        <span :style="{ fontSize: '25px', marginLeft: '15px' }">{{ post.OwnerName }}</span>
+                        <img :src="post.AvatarURL.trim() != '' ? post.AvatarURL : 'https://storage.googleapis.com/clicker_bucket/user.png'"/>
+                        <span>{{ post.OwnerName }}</span>
                     </div>
-                    <div class="postImage" :style="{ height: '250px', width:'100%', position: 'relative',  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >
-                        <img :src="post.ImagePath" :style="{ height: 'inherit', width:'100%', backgroundRepeat: 'no-repeat', backgroundSize: 'cover', objectFit:'contain'}" />
+                    <div class="postImage" :style="{  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >
+                        <img :src="post.ImagePath" :style="{ maxWidth: '100%', height: 'auto', width:'100%'}" />
                     </div>
-                    <div class="postDescription" :style="{ height: '50px', alignItems: 'center', display:'flex' }">
-                        <span :style="{ fontSize: '25px' }">{{ post.Description }}</span>
+                    <div class="postDescription">
+                        <span>{{ post.Description }}</span>
                     </div>
                     <div v-if="checkIfCanUnlockPost(post.ID, post.OwnerID)" class="unlock" :style="{ height: '70px', display:'flex', alignItems:'center', justifyContent: 'space-between', padding: '15px' }">
-                        <span :style="{ fontSize: '25px' }">🍆{{ post.Price }}</span>
+                        <span :style="{ fontSize: '14px' }">🍆{{ post.Price }}</span>
                         <button class="boost-purchase-button" @click="setStatePopup('unlock', post.ID, post.Price, null, null, null)">Unlock</button>
                     </div>
                     <div v-if="post.Type != 'vote'" class="donations" :style="{ height: '70px', display:'flex', alignItems:'center', justifyContent: 'space-between', padding: '15px' }">
-                        <span :style="{ fontSize: '25px' }">Donated: 🍆{{ post.Donated }}</span>
+                        <span class="donation__counter">Donated: 🍆{{ post.Donated }}</span>
                         <button v-if="post.OwnerID !== userStore.user?.id" class="boost-purchase-button" @click="setStatePopup('donate', post.ID, post.Price, null,null, null)">Donate</button>
                     </div>
                     <div v-else>
-                        <div>
-                            <span :style="{ fontSize:'19px'}">Всего: {{  (post.VoteYes + post.VoteNo) * post.VotePrice }}🍆</span>
+                        <div class="vote__counter">
+                            <span>Всего: {{  (post.VoteYes + post.VoteNo) * post.VotePrice }}🍆</span>
                         </div>
-                        <div :style="{ height:'95px', display:'flex', justifyContent:'space-between', alignItems:'center'}">
+                        <div class="vote__counter-actions">
                             <div :style="{ display:'felx', flexDirection:'column', justifyContent:'center', textAlign:'center'}">
                                 <span :style="{ fontSize:'18px'}">{{ post.VoteYes }} ✅</span>
                                 <button class="boost-purchase-button" :style="{ marginLeft:'15px', marginTop:'10px', height:'40px', backgroundColor:'#3f8b1e', display:'flex', justifyContent:'center', alignItems:'center' }" @click="votePost(post.ID, 'yes', post.VotePrice)">Да {{ post.VotePrice }}🍆</button>
@@ -647,8 +629,9 @@ input[type=number] {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #010300a3;
+    background: #261e25;
     position: absolute;
+    z-index: -1;
 }
 
 .createPostMenu {
@@ -664,38 +647,29 @@ input[type=number] {
     justify-content: center;
 }
 
-.navMenu{
-    position: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #010300a3;
-    width: 100%;
-    z-index: 999;
-    top: 0;
-}
-
 .boosts {
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    margin-top: 60px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    backdrop-filter: blur(5px);
+    gap: 25px;
+    margin-bottom: 100px;
+    padding: 0 12px;
 }
 
 .boost-purchase-button {
     padding: 10px 20px;
     border: none;
-    background-color: #2c2c2c;
+    background: linear-gradient(90deg, #d67eff, #b231cb, #d67eff);
+    box-shadow: inset 0 0 0 1px #d67eff;
+    background-size: 125%;
     color: white;
-    width: 170px;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
-    border-radius: 5px;
+    border-radius: 30px;
     cursor: pointer;
 }
 
@@ -718,11 +692,72 @@ input[type=number] {
     background: "gray";
     display: flex;
     flex-direction: column;
-    background: #010300a3;
+    background: #362b37;
+    border-radius: 16px;
 }
 .ownerData {
     display: flex;
     align-items: center;
+}
+
+.ownerData>img {
+    width: 52px;
+    height: 52px;
+    padding: 10px;
+    border-radius: 30px;
+}
+
+.ownerData>span {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.postDescription {
+    padding: 15px;
+}
+
+.postDescription>span {
+    font-size: 16px;
+    color: #c0bfc0;
+}
+
+.postDescription:has(span:empty) {
+    display: none !important;
+}
+
+.donations,
+.vote__counter,
+.vote__counter-actions {
+    background-color: #ff00ea1f;
+}
+
+.donations {
+    border-radius: 0 0 16px 16px;
+}
+
+.vote__counter {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.vote__counter>span {
+    font-size: 15px;
+    font-weight: 700;
+    padding: 5px 15px;
+    background-color: #0000003d;
+    border-radius: 20px;
+}
+
+.vote__counter-actions {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 20px;
+    border-radius: 0 0 16px 16px;
+}
+
+.donation__counter {
+    font-weight: 600;
 }
 
 /*progressbar*/
