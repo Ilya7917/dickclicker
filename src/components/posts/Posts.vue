@@ -76,14 +76,15 @@ async function fetchUserData() {
                             }
                         }
                     }
-                    userStore.posts = result;
-                    
-                    userStore.posts.forEach(post => {
-                        const result = checkImg(post.AvatarURL)
-                        if (!result) {
-                            post.AvatarURL = "https://storage.googleapis.com/clicker_bucket/user.png"
-                        }
+                    result.forEach(post => {
+                        userStore.checkAvailableImg(post.AvatarURL).then(ok => {
+                            if(!ok){
+                                post.AvatarURL = "https://storage.googleapis.com/clicker_bucket/user.png"
+                            }
+                        })
                     })
+
+                    userStore.posts = result;
 
                 }
             }),
@@ -401,15 +402,6 @@ const votePost = (postId: number, voteType: string, votePrice:number) => {
 const handleEnter = (event: KeyboardEvent) => {
   (event.target as HTMLInputElement).blur();
 };
-
-async function checkImg(url: string): Promise<boolean> {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    } catch {
-        return false;
-    }
-}
 </script>
 
 <template>
