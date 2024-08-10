@@ -394,6 +394,10 @@ const votePost = (postId: number, voteType: string, votePrice:number) => {
 const handleEnter = (event: KeyboardEvent) => {
   (event.target as HTMLInputElement).blur();
 };
+
+const calculateUserBalance = (amount: number) => {
+    
+}
 </script>
 
 <template>
@@ -480,7 +484,7 @@ const handleEnter = (event: KeyboardEvent) => {
                     </div>
                     <div v-if="post.Type != 'vote'" class="donations" :style="{ height: '70px', display:'flex', alignItems:'center', justifyContent: 'space-between', padding: '15px' }">
                         <span class="donation__counter">Donated: 🍆{{ post.Donated }}</span>
-                        <button v-if="post.OwnerID !== userStore.user?.id" class="boost-purchase-button" @click="setStatePopup('donate', post.ID, post.Price, null,null, null)">Donate</button>
+                        <button  class="boost-purchase-button" @click="setStatePopup('donate', post.ID, post.Price, null,null, null)">Donate</button>
                     </div>
                     <div v-else>
                         <div class="vote__counter">
