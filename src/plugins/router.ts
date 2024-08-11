@@ -25,6 +25,9 @@ const routes = [
     },
     {
         path: '/market', name: 'market', component: () => import('@/components/market/Market.vue')
+    },
+    {
+        path: '/tasks', name:'tasks', component: () => useWebAppPopup().showAlert("In developing 🛠️")
     }
 ]
 

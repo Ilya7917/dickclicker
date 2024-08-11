@@ -7,6 +7,8 @@ import AddIcon from "@/assets/images/addIcon.svg";
 import { useUserStore } from '@/store/user';
 import { useMarketStore } from '@/store/marketstore'
 
+import NavMenu from './NavMenu.vue';
+
 import MarketItem from './MarketItem.vue';
 
 const { t } = useI18n();
@@ -77,18 +79,6 @@ onMounted(() => {
    myUserId.value = userStore.user?.id
   }
 });
-
-
-function closePopup() {
-  if(popupState.value == 'create') return;
-  isPopupVisible.value = false;
-}
-
-
-
-const popupState = ref("visible");
-
-
 
 const pageState = ref('market')
 const progressPost = ref(0);
@@ -288,12 +278,8 @@ const finishOrder = () => {
 <template>
 
   <div class="telegram-channels">
-    <div v-if="pageState != 'create'" class="earn-title">
-        🛒 {{ $t("bottomMenu.market") }}
-    </div>
-
-    <div v-if="pageState === 'create'" class="createPostMenu">
-        <button class="mypost-button" :style="{ marginTop: '10px' }" @click="changePageState('market')">Назад</button>
+    <NavMenu :page-state="pageState" @change-page-state="changePageState" />
+    <div v-if="pageState === 'create'" class="createPostMenu" :style="{ marginTop:'15px' }">
         <div :style="{ marginTop:'20px' }">
             <ul id="progressbar">
                 <li v-for="item in progressNewPosts" :class="item.isActive ? 'active' : ''">{{  item.text }}</li>
@@ -342,24 +328,23 @@ const finishOrder = () => {
     </div>
 
     <div v-if="pageState == 'market'" :style="{ display:'flex', flexDirection:'column', justifyContent:'space-between' }">
-        <div :style="{ height:'40vh' }">
-          <div class="channels-title" :style="{display:'flex', justifyContent:'space-between'}">
-            <button class="boost-purchase-button" :style="{margin: '15px 25px'}" @click="">Купить</button>
-            <button class="boost-purchase-button" :style="{margin: '15px 25px', opacity:'0.4'}" @click="useWebAppPopup().showAlert('🛠️ Coming soon')">Продать</button>
-          </div>
-          <div :style="{display: 'flex', width:'100%', justifyContent:'flex-end'}" @click="changePageState('create')">
-              <img :src="AddIcon" alt="Your Icon" :style="{ height: '45px', marginRight:'15px' }" />
-          </div>
+        <div :style="{ height:'100%' }">
           <div v-if="isCanView" class="channels-list">
-            <MarketItem :orders="marketStore.myOrders != undefined ? marketStore.myOrders : []" :myUserId="myUserId" :changeVisibleState="changeVisibleState" :getPaymentMethodNameBySuffix="getPaymentMethodNameBySuffix" />
-            <MarketItem :orders="marketStore.orders != undefined ? marketStore.orders : []" :myUserId="myUserId" :changeVisibleState="changeVisibleState" :getPaymentMethodNameBySuffix="getPaymentMethodNameBySuffix" />
+              <MarketItem :orders="marketStore.orders != undefined ? marketStore.orders : []" :myUserId="myUserId" :changeVisibleState="changeVisibleState" :getPaymentMethodNameBySuffix="getPaymentMethodNameBySuffix" />
           </div>
         </div>
     </div>
 
+    <div v-if="pageState == 'myorders'">
+      <div :style="{ height:'100%' }">
+          <div v-if="isCanView" class="channels-list">
+            <MarketItem :orders="marketStore.myOrders != undefined ? marketStore.myOrders : []" :myUserId="myUserId" :changeVisibleState="changeVisibleState" :getPaymentMethodNameBySuffix="getPaymentMethodNameBySuffix" />
+          </div>
+      </div>
+    </div>
+
 
     <div v-if="pageState == 'visible'">
-      <button class="boost-purchase-button" :style="{ width:'40%' }" @click="changePageState('market')">Назад</button>
       <div :style="{ display:'flex', justifyContent:'center' }">
           <span :style="{ fontSize:'30px', fontWeight:'bold' }">{{ selectedOrder?.OwnerID !== myUserId ? "" : "Ваш "}} Ордер №{{ selectedOrder?.ID }}</span>
       </div>

@@ -81,7 +81,7 @@ async function fetchUserData() {
                 }
             }),
             userStore.getMyPosts(),
-            userStore.getMyPostsBalance()
+            // userStore.getMyPostsBalance()
         ]);
     } catch (error) {
         console.error('Error fetching user data:', error);
@@ -92,14 +92,6 @@ onMounted(() => {
     pageState.value = "posts";
     fetchUserData();
 });
-
-function closePopup() {
-  if (justOpened.value) {
-    justOpened.value = false;
-    return;
-  }
-  isPopupVisible.value = false;
-}
 
 const handleChangePageState = (state: string) => {
   if (state === pageState.value) return;
@@ -337,14 +329,15 @@ const exchangeValue = ref(0);
 
 const exchangeDonateMoney = () => {
     if(!userStore.user) return;
-    if(userStore.posts_balance != null && userStore.posts_balance < exchangeValue.value) {
+    if(userStore.user.posts_balance != null && userStore.user.posts_balance < exchangeValue.value) {
         useWebAppPopup().showAlert("ⓘ Недостаточно средств для вывода!");
     }
     useWebAppPopup().showAlert("ⓘ Система удерживает 30% комиссию при переводе средств с донатного счёта на основной! ⓘ");
     userStore.exchangeDonateMoney(exchangeValue.value).then(result => {
         if(result) {
-            if(userStore.posts_balance != null)
-            userStore.posts_balance -= exchangeValue.value
+            if(userStore.user?.posts_balance != null) {
+                userStore.user.posts_balance -= exchangeValue.value
+            }
         }
     });
 }
@@ -538,7 +531,7 @@ const calculateUserBalance = (amount: number) => {
             </div>
             <div v-if="popupState == 'change'">
                 <div class="slidecontainer" :style="{ marginTop: '30px'}">
-                    <input type="range" min="0" :max="userStore.posts_balance !== null ? userStore.posts_balance : 0" class="slider" id="myRange" v-model="exchangeValue">
+                    <input type="range" min="0" :max="userStore.user?.posts_balance !== null ? userStore.user?.posts_balance : 0" class="slider" id="myRange" v-model="exchangeValue">
                 </div>
                 <p>🍆{{ exchangeValue }}</p>
                 <button v-if="exchangeValue > 0" class="boost-purchase-button" :style="{ width:'100%'}" @click="exchangeDonateMoney">Exchange</button>

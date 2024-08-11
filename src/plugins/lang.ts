@@ -24,7 +24,8 @@ const messages = {
       posts: "Posts",
       boosts: "Boosts",
       referrals: "Referrals",
-      market: 'Market'
+      market: 'Market',
+      tasks: 'Tasks'
     },
     top: {
       day: "Day",
@@ -110,7 +111,8 @@ const messages = {
       posts: "Посты",
       boosts: "Бустеры",
       referrals: "Рефералы",
-      market: 'Маркет'
+      market: 'Маркет',
+      tasks: 'Задачи'
     },
     top: {
       day: "День",
