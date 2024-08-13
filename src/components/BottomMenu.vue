@@ -1,14 +1,7 @@
 <template>
   <div class="energy-section">
     <div ref="withdrawalBalanceRef" :style="{ left:'15px', position:'fixed', display:'flex', justifyContent:'space-between' }">
-      <span>Доступный баланс на вывод: 0🍆</span>
-    </div>
-
-    <div :style="{ right:'15px', top: '25px', position:'fixed', display:'flex', justifyContent:'space-between' }">
-      <router-link class="menu-item" :style="{ fontSize: '35px'}" to="/tasks" tag="button">
-          📋
-          <span>{{ $t("bottomMenu.tasks") }}</span>
-      </router-link>
+      <span>Доступно на вывод: {{ userStore.user?.withdrawal_balance }}🍆</span>
     </div>
 
     <div ref="skinsRef" :style="{ right:'15px', position:'fixed', display:'flex', justifyContent:'space-between' }">
@@ -39,7 +32,7 @@
         <span>{{ $t("bottomMenu.top") }}</span>
       </router-link>
       <router-link class="menu-item" to="/channels" tag="button">
-        💰
+        📋
         <span>{{ $t("bottomMenu.earn") }}</span>
       </router-link>
       <router-link class="menu-item" to="/market" tag="button">
