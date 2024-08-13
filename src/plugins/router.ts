@@ -18,7 +18,7 @@ const routes = [
         path: '/channels', name: 'channels', component: () => import('@/components/Channels.vue')
     },
     {
-        path: '/slots', name: 'slots', component: () => useWebAppPopup().showAlert("In developing 🛠️")
+        path: '/slots', name: 'slots', component: () => import('@/components/slots/SlotMachine.vue')
     },
     {
         path: '/posts', name: 'posts', component: () => import('@/components/posts/Posts.vue')

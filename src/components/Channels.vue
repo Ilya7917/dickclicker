@@ -433,7 +433,7 @@ const nextButtonChangeState = () => {
 
 
     <div v-if="pageState != 'create'" class="earn-title">
-      🤑 {{ $t("earn.name") }}
+      📋 {{ $t("earn.name") }}
     </div>
 
     <div v-if="pageState === 'create'" class="createPostMenu">

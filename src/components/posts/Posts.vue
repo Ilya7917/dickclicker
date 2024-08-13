@@ -6,12 +6,7 @@ import AcceptIcon from "@/assets/images/acceptet.svg";
 import DonateBalance from '../account/DonateBalance.vue';
 import NavMenu from './NavMenu.vue';
 import { useWebAppPopup } from 'vue-tg'
-import question from "@/assets/images/question.svg";
-import {useWebAppViewport, useWebApp, useWebAppBackButton, useWebAppTheme, useWebAppClosingConfirmation} from 'vue-tg'
-import moment from 'moment';
 import { useI18n } from 'vue-i18n';
-import { Interface } from 'readline';
-import axios from 'axios';
 const { t } = useI18n();
 const userStore = useUserStore()
 userStore.getBoosts()
@@ -51,6 +46,19 @@ const progressNewPosts = [
     }
 ]
 
+const filterPosts = (array: allPosts[]): allPosts[] => {
+    if(userStore.posts == null) return [];
+    const nonVotePosts = userStore.posts.filter(post => post.Type !== 'vote')
+        .sort((a, b) => b.Donated - a.Donated); // Сортировка по Donated
+
+
+    const votePosts = userStore.posts.filter(post => post.Type === 'vote')
+        .sort((a, b) => (b.VoteYes + b.VoteNo) - (a.VoteYes + a.VoteNo)); // Сортировка по сумме VoteYes и VoteNo
+
+
+    return [...nonVotePosts, ...votePosts]
+}
+
 async function fetchUserData() {
     try {
         await Promise.all([
@@ -58,6 +66,11 @@ async function fetchUserData() {
             userStore.getPosts().then(ok => {
                 if(ok) {
                     if(userStore.posts == null) return;
+                    
+                    let myFilteredPosts = filterPosts(userStore.posts);
+                    
+                    userStore.posts = myFilteredPosts;
+
                     const donatePosts: allPosts[] = userStore.posts.filter(post => post.Type === 'donate');
                     const votePosts: allPosts[] = userStore.posts.filter(post => post.Type === 'vote');
 
@@ -65,13 +78,13 @@ async function fetchUserData() {
                     while (donatePosts.length > 0 || votePosts.length > 0) {
                         if (donatePosts.length > 0) {
                             const post = donatePosts.shift();
-                            if (post !== undefined) {  // Проверяем, что post не undefined
+                            if (post !== undefined) { 
                                 result.push(post);
                             }
                         }
                         if (votePosts.length > 0) {
                             const post = votePosts.shift();
-                            if (post !== undefined) {  // Проверяем, что post не undefined
+                            if (post !== undefined) {  
                                 result.push(post);
                             }
                         }
@@ -81,7 +94,6 @@ async function fetchUserData() {
                 }
             }),
             userStore.getMyPosts(),
-            // userStore.getMyPostsBalance()
         ]);
     } catch (error) {
         console.error('Error fetching user data:', error);
@@ -198,8 +210,6 @@ const createNewPost = () => {
     }
 }
 
-const getImageUrl = (path: string) => { return path; }
-
 const popupState = ref("close")
 
 const currentPost = ref({
@@ -210,6 +220,13 @@ const currentPost = ref({
     donated: 0
 })
 const setStatePopup = (state :string, postid: number, price: number, imagePath: string | null, description: string | null, donated: number | null) => { 
+    if(state == 'dump'){
+        if(userStore.user != null && userStore.user.balance < 1000){
+            useWebAppPopup().showAlert("Недостаточно средств. Минимум 1000 🍆");
+            return;
+        }
+    }
+    
     popupState.value = state;
     currentPost.value.id = postid;
     currentPost.value.price = price;
@@ -322,6 +339,9 @@ const textForPopup = (state: string) =>{
         case "change":
             return "Exchange donated dicks for basic ones?"
             break;
+        case "dump":
+            return "Dump post?"
+            break;
     }
 }
 
@@ -388,9 +408,16 @@ const handleEnter = (event: KeyboardEvent) => {
   (event.target as HTMLInputElement).blur();
 };
 
-const calculateUserBalance = (amount: number) => {
-    
+const dumpedValue = ref(0)
+
+const dumpedPost = (id: number) => {
+    userStore.dumpPost(id, 1000).then(result => {
+        if(result) {
+            fetchUserData()
+        }
+    })
 }
+
 </script>
 
 <template>
@@ -476,12 +503,12 @@ const calculateUserBalance = (amount: number) => {
                         <button class="boost-purchase-button" @click="setStatePopup('unlock', post.ID, post.Price, null, null, null)">Unlock</button>
                     </div>
                     <div v-if="post.Type != 'vote'" class="donations" :style="{ height: '70px', display:'flex', alignItems:'center', justifyContent: 'space-between', padding: '15px' }">
-                        <span class="donation__counter">Donated: 🍆{{ post.Donated }}</span>
+                        <span class="donation__counter">Donated: 🍆{{ post.Donated - post.Dumped }}</span>
                         <button  class="boost-purchase-button" @click="setStatePopup('donate', post.ID, post.Price, null,null, null)">Donate</button>
                     </div>
                     <div v-else>
                         <div class="vote__counter">
-                            <span>Всего: {{  (post.VoteYes + post.VoteNo) * post.VotePrice }}🍆</span>
+                            <span>Всего: {{  ( (post.VoteYes + post.VoteNo) * post.VotePrice ) - post.Dumped }}🍆</span>
                         </div>
                         <div class="vote__counter-actions">
                             <div :style="{ display:'felx', flexDirection:'column', justifyContent:'center', textAlign:'center'}">
@@ -494,6 +521,9 @@ const calculateUserBalance = (amount: number) => {
                             </div>
                         </div>
                     </div>
+                    <div :style="{ display:'flex', justifyContent:'flex-end', alignItems:'center', padding:'15px' }">
+                        <button class="boost-purchase-button" :style="{ padding:'15px', height:'40px', display:'flex', justifyContent:'center', alignItems:'center' }" @click="dumpedPost(post.ID)">😡 Dump 1.000 🍆</button>
+                    </div>
                 </div>
         </div>
     </div>
@@ -501,7 +531,7 @@ const calculateUserBalance = (amount: number) => {
 
 
 
-    <div class="boost-purchase-popup" :class="{ 'visible': popupState == 'unlock' || popupState == 'donate' || popupState == 'visible' || popupState == 'change' }" @click="() => { popupState = 'close' }">
+    <div class="boost-purchase-popup" :class="{ 'visible': popupState == 'unlock' || popupState == 'donate' || popupState == 'visible' || popupState == 'change' || popupState == 'dump' }" @click="() => { popupState = 'close' }">
 <!--        <div class="popup-overlay" @click="closePopup"></div>-->
         <div class="popup-content">
             <div class="popup-header">
@@ -524,6 +554,24 @@ const calculateUserBalance = (amount: number) => {
                 <p>🍆{{ donatedValue }}</p>
                 <button v-if="donatedValue > 0" class="boost-purchase-button" :style="{ width:'100%'}" @click="donateToPost">Donate post</button>
             </div>
+
+            <div v-if="popupState == 'dump'" class="popup-body">
+                <p> Не нравится пост? </p>
+                <div class="slidecontainer" :style="{ marginTop: '30px' }">
+                    <input
+                    type="range"
+                    min="1000"
+                    :max="userStore.user?.balance"
+                    step="1000"
+                    class="slider"
+                    id="myRange"
+                    v-model="dumpedValue"
+                    />
+                </div>
+                <p>🍆{{ dumpedValue }}</p>
+                <button v-if="dumpedValue >= 1000" class="boost-purchase-button" :style="{ width:'100%'}" @click="dumpedPost(currentPost.id)">Dump post</button>
+            </div>
+
             <div v-if="popupState == 'visible'">
                 <img :src="currentPost.imagePath" :style="{ height: '200px', width:'100%', backgroundRepeat: 'no-repeat', objectFit:'contain'}" />
                 <p v-if="currentPost.decription !== ''">{{ currentPost.decription }}</p>

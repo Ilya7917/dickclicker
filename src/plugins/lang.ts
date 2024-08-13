@@ -19,7 +19,7 @@ const messages = {
     },
     bottomMenu: {
       top: "Top",
-      earn: "Earn",
+      earn: "Tasks",
       skins: "Skins",
       posts: "Posts",
       boosts: "Boosts",
@@ -37,7 +37,7 @@ const messages = {
       yourPlace: "Your place is {place}"
     },
     earn: {
-      name: "Earn",
+      name: "Tasks",
       channels: "Channels",
       rewardReached: "Reward reached",
       selectedChannel: `Subscribe to the channel and get`,
@@ -106,7 +106,7 @@ const messages = {
     },
     bottomMenu: {
       top: "Статистика",
-      earn: "Бонусы",
+      earn: "Задачи",
       skins: "Скины",
       posts: "Посты",
       boosts: "Бустеры",
@@ -124,7 +124,7 @@ const messages = {
       yourPlace: "Ваше место {place}"
     },
     earn: {
-      name: "Заработок",
+      name: "Задачи",
       channels: "Каналы",
       rewardReached: "Получено",
       selectedChannel: `Подпишитесь на канал и получите`,

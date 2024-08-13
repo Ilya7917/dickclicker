@@ -6,6 +6,7 @@ export interface User {
     id: number;
     balance: number;
     posts_balance: number;
+    withdrawal_balance: number;
     first_name: string;
     username: string;
     language_code: string;
@@ -71,6 +72,7 @@ export interface allPosts {
     Description: string;
     Price: number;
     Donated: number;
+    Dumped: number;
     Type: string;
     VotePrice: number;
     VoteYes: number;
@@ -98,7 +100,7 @@ export const useUserStore = defineStore('user', {
         posts_balance: 0 as number | null,
     }),
     getters: {
-        getAccessToken: (state) =>  state.user?.access_token,
+        getAccessToken: (state) => state.user?.access_token,
         getCurrentSkin: (state) => state.skin,
         getCurrentBg: (state) => state.bg
     },
@@ -264,6 +266,25 @@ export const useUserStore = defineStore('user', {
                 return true;
               }
               return false;
+        },
+        async dumpPost(postId:number, amount: number) {
+            if(!this.user) return;
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_HOST}/dumpPost`,
+                {
+                    post_id: postId,
+                    dumped_amount: amount
+                },
+                {
+                  headers: {
+                    'x-api-key': this.getAccessToken,
+                  }
+                }
+            );
+            if(response.data.sucess) {
+                this.user.balance -= amount;
+                return true;
+            } 
         },
         async votePost(postId: number, voteType: string){
             if(!this.user) return;
