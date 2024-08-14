@@ -77,9 +77,9 @@
   import blowImg from '@/assets/images/RotateEffect.png';
   import { useWebAppPopup, useWebAppRequests } from 'vue-tg'
 
-  import spinAudio from '@/assets/sounds/SlotMachineSounds/Reel spin.wav';
-  import winAudio from '@/assets/sounds/SlotMachineSounds/Win 3.wav'
-  import jackPotAudio from '@/assets/sounds/SlotMachineSounds/Jackpot 2.wav'
+  import spinAudio from '@/assets/sounds/SlotMachineSounds/Reelspin.wav';
+  import winAudio from '@/assets/sounds/SlotMachineSounds/Win3.wav'
+  import jackPotAudio from '@/assets/sounds/SlotMachineSounds/Jackpot2.wav'
 
   const SLOTS_PER_REEL = 12;
   const REEL_RADIUS = 150 / 1.5; 
@@ -275,7 +275,7 @@
            this.showSpinButtons = true;
            return;
         }
-    
+        
 
         machineStore.spin(this.bet).then(result => {
           if(result.sucess) {
@@ -397,7 +397,7 @@
         if(winArray.length > 0) {
           this.showWinScreen = true;
           if(this.numberInRandoms != 1){ 
-            this.winAudio.play();
+            this.audioWin.play();
             let winDifference = (this.bet / 100) * this.winPercents[Math.floor(Math.random() * this.winPercents.length)];
             if(winArray.length < 2) this.winAmount = this.bet - winDifference;
             else {
