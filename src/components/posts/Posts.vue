@@ -257,7 +257,7 @@ const unlockNewPost = () => {
 
 const checkIfCanUnlockPost = (postId: number, ownerId: number) => {
     if(!userStore.user) return;
-    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].Type != 'donate') return false;
+    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].Type == 'vote') return false;
     if(userStore.user.id == ownerId) return false;
     if(userStore.posts != null && !userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].IsPrivate) return false;
 
