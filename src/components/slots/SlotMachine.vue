@@ -68,7 +68,6 @@
         <button class="glow-on-hover" @click="mode = 'single'" :style="{ fontSize:'23px', textAlign:'center', marginTop:'30px' }" >STOP 🎰</button>
     </div>
 
-    
 
 </template>
   
@@ -77,6 +76,11 @@
   import { useUserStore } from '@/store/user';
   import blowImg from '@/assets/images/RotateEffect.png';
   import { useWebAppPopup, useWebAppRequests } from 'vue-tg'
+
+  import spinAudio from '@/assets/sounds/SlotMachineSounds/Reel spin.wav';
+  import winAudio from '@/assets/sounds/SlotMachineSounds/Win 3.wav'
+  import jackPotAudio from '@/assets/sounds/SlotMachineSounds/Jackpot 2.wav'
+
   const SLOTS_PER_REEL = 12;
   const REEL_RADIUS = 150 / 1.5; 
 
@@ -88,6 +92,9 @@
       return {
         xray: false,
         perspective: true,
+        audioSpin: null,
+        audioWin: null,
+        jackPotAudio: null,
         mode: 'single',
         showSpinButtons: true,
         showWinScreen: false,
@@ -142,7 +149,12 @@
       };
     },
     mounted() {
-      
+      this.audioSpin = new Audio(spinAudio);
+      this.audioSpin.loop = true;
+      this.audioWin = new Audio(winAudio);
+      this.jackPotAudio = new Audio(jackPotAudio);
+
+
       for(let i = 0; i < this.ringIds.length; i++) {
         this.createSlots(document.getElementById(this.ringIds[i]), i+1)
       }
@@ -254,6 +266,7 @@
       },
       startSpinning(mode) {
         /* check user balance logic */
+        
         if(userStore.user == null) return;
 
         if(userStore.user.balance < this.bet) {
@@ -262,6 +275,7 @@
            this.showSpinButtons = true;
            return;
         }
+    
 
         machineStore.spin(this.bet).then(result => {
           if(result.sucess) {
@@ -272,6 +286,8 @@
             for(let i = 0; i < this.ringIds.length; i++) {
               this.createSlots(document.getElementById(this.ringIds[i]), i+1)
             }
+            
+            this.audioSpin.play();
 
             this.showSpinButtons = false;
             this.clearHighlight(); // очищаем подсветку перед началом прокрутки
@@ -291,9 +307,10 @@
             setTimeout(() => {
               this.highlightVisibleSlots();
               this.ensureWinningCombination();
+              this.audioSpin.pause();
             }, (timer + 5 * 0.5) * 1000); // время завершения прокрутки последнего барабана
-              }
-            })        
+          }
+        })        
       },
       resetAnimation() {
         for (let i = 1; i <= 5; i++) {
@@ -380,6 +397,7 @@
         if(winArray.length > 0) {
           this.showWinScreen = true;
           if(this.numberInRandoms != 1){ 
+            this.winAudio.play();
             let winDifference = (this.bet / 100) * this.winPercents[Math.floor(Math.random() * this.winPercents.length)];
             if(winArray.length < 2) this.winAmount = this.bet - winDifference;
             else {
@@ -389,6 +407,7 @@
             } 
           }
           else {
+            this.jackPotAudio.play();
             this.winAmount = this.bet * 100
           }
           return;
