@@ -508,7 +508,7 @@ const releaseUserTask = (channelId:number, UserID: number, channelBalance: numbe
       -->
     </div>
 
-    <div v-if="pageState == 'whales'" :style="{ display:'flex', flexDirection:'column' }">
+    <div v-if="pageState == 'whales'" :style="{ display:'flex', flexDirection:'column', overflowY:'auto' }">
       <ChannelBoard :isCanView="isCanView" :channels="channelsStore.whales || []" :openChannelLink="openChannelLink" :myUserId="myUserId"  />
     </div>
 
