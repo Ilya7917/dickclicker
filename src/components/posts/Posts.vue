@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { allPosts, UserWithBoosts, useUserStore } from '@/store/user';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, Ref } from 'vue';
 import loadingIcon from "@/assets/images/loading.svg";
 import AcceptIcon from "@/assets/images/acceptet.svg";
 import DonateBalance from '../account/DonateBalance.vue';
@@ -257,7 +257,7 @@ const unlockNewPost = () => {
 
 const checkIfCanUnlockPost = (postId: number, ownerId: number) => {
     if(!userStore.user) return;
-    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].Type == 'vote') return false;
+    if(userStore.posts != null && userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].Type != 'donate') return false;
     if(userStore.user.id == ownerId) return false;
     if(userStore.posts != null && !userStore.posts[userStore.posts.findIndex(x => x.ID == postId)].IsPrivate) return false;
 
@@ -418,6 +418,23 @@ const dumpedPost = (id: number) => {
     })
 }
 
+let userPosts: Ref<allPosts[] | undefined> = ref(undefined);
+let userPostsName = "";
+const showUserPosts = (userId: number) => {
+    if (userStore.posts && userStore.posts.length > 0) {
+        userPosts.value = userStore.posts.filter(x => x.OwnerID === userId);
+        if(userPosts.value != undefined && userPosts.value){
+            pageState.value = 'userposts';
+            userPostsName = userPosts.value[0].OwnerName
+        }
+    } else {
+        userPosts.value = [];
+    }
+
+    
+
+}
+
 </script>
 
 <template>
@@ -487,6 +504,51 @@ const dumpedPost = (id: number) => {
 
     <div v-if="pageState === 'posts'" class="boosts">
         <div v-for="(post, index) in userStore.posts" :key="post.ID" :style="{ width: '100%' }">
+                <div class="post">
+                    <div class="ownerData">
+                        <img :src="post.AvatarURL" @click="showUserPosts(post.OwnerID)"/>
+                        <span @click="showUserPosts(post.OwnerID)">{{ post.OwnerName }}</span>
+                    </div>
+                    <div class="postImage" :style="{  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >
+                        <img :src="post.ImagePath" :style="{ maxWidth: '100%', height: 'auto', width:'100%'}" />
+                    </div>
+                    <div class="postDescription">
+                        <span>{{ post.Description }}</span>
+                    </div>
+                    <div v-if="checkIfCanUnlockPost(post.ID, post.OwnerID)" class="unlock" :style="{ height: '70px', display:'flex', alignItems:'center', justifyContent: 'space-between', padding: '15px' }">
+                        <span :style="{ fontSize: '14px' }">🍆{{ post.Price }}</span>
+                        <button class="boost-purchase-button" @click="setStatePopup('unlock', post.ID, post.Price, null, null, null)">Unlock</button>
+                    </div>
+                    <div v-if="post.Type != 'vote'" class="donations" :style="{ height: '70px', display:'flex', alignItems:'center', justifyContent: 'space-between', padding: '15px' }">
+                        <span class="donation__counter">Donated: 🍆{{ post.Donated - post.Dumped }}</span>
+                        <button  class="boost-purchase-button" @click="setStatePopup('donate', post.ID, post.Price, null,null, null)">Donate</button>
+                    </div>
+                    <div v-else>
+                        <div class="vote__counter">
+                            <span>Всего: {{  ( (post.VoteYes + post.VoteNo) * post.VotePrice ) - post.Dumped }}🍆</span>
+                        </div>
+                        <div class="vote__counter-actions">
+                            <div :style="{ display:'felx', flexDirection:'column', justifyContent:'center', textAlign:'center'}">
+                                <span :style="{ fontSize:'18px'}">{{ post.VoteYes }} ✅</span>
+                                <button class="boost-purchase-button" :style="{ marginLeft:'15px', marginTop:'10px', height:'40px', backgroundColor:'#3f8b1e', display:'flex', justifyContent:'center', alignItems:'center' }" @click="votePost(post.ID, 'yes', post.VotePrice)">Да {{ post.VotePrice }}🍆</button>
+                            </div>
+                            <div :style="{ display:'felx', flexDirection:'column', justifyContent:'center', textAlign:'center'}">
+                                <span :style="{ fontSize:'18px'}">{{ post.VoteNo }} ❌</span>
+                                <button class="boost-purchase-button" :style="{ marginRight:'15px',  marginTop:'10px', height:'40px', backgroundColor: '#bc0e0e', display:'flex', justifyContent:'center', alignItems:'center' }" @click="votePost(post.ID, 'no', post.VotePrice)">Нет {{ post.VotePrice }}🍆</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div :style="{ display:'flex', justifyContent:'flex-end', alignItems:'center', padding:'15px' }">
+                        <button class="boost-purchase-button" :style="{ padding:'15px', height:'40px', display:'flex', justifyContent:'center', alignItems:'center' }" @click="dumpedPost(post.ID)">😡 Dump 1.000 🍆</button>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+
+    <div v-if="pageState === 'userposts'" class="boosts">
+        <span :style="{ fontSize:'20px', fontWeight:'bold', margin:'0 auto' }"> Посты пользователя: {{ userPostsName }} </span>
+        <div v-for="(post, index) in userPosts" :key="post.ID" :style="{ width: '100%' }">
                 <div class="post">
                     <div class="ownerData">
                         <img :src="post.AvatarURL"/>

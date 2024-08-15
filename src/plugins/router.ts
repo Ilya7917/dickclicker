@@ -15,7 +15,7 @@ const routes = [
         path: '/boosts', name: 'boosts', component: () => import('@/components/boosts/BoostsIndex.vue')
     },
     {
-        path: '/channels', name: 'channels', component: () => import('@/components/Channels.vue')
+        path: '/channels', name: 'channels', component: () => import('@/components/channels/Channels.vue')
     },
     {
         path: '/slots', name: 'slots', component: () => import('@/components/slots/SlotMachine.vue')

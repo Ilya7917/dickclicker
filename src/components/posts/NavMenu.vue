@@ -2,7 +2,8 @@
     import FeedIcon from "@/assets/images/feed-icon.svg";
     import AddPostIcon from "@/assets/images/add-post.svg";
     import ProfileIcon from "@/assets/images/profile-icon.svg";
-    
+    import BackIcon from "@/assets/images/back-icon.svg"
+
     const props = defineProps<{
         pageState: string;
     }>();
@@ -18,18 +19,20 @@
 <template>
     <div class="navMenu">
         <div class="nav-btn__wrapper">
-            <button class="post-component__nav-btn feed" :class="{ 'active': props.pageState === 'posts' }" @click="changePageState('posts')">
+            <button v-if="props.pageState != 'userposts'" class="post-component__nav-btn feed" :class="{ 'active': props.pageState === 'posts' }" @click="changePageState('posts')">
                 <img :src="FeedIcon" />
             </button>
-            <button class="post-component__nav-btn compose" :class="{ 'active': props.pageState === 'create' }" @click="changePageState('create')">
+            <button v-if="props.pageState != 'userposts'" class="post-component__nav-btn compose" :class="{ 'active': props.pageState === 'create' }" @click="changePageState('create')">
                 <img :src="AddPostIcon" />
             </button>
-            <button class="post-component__nav-btn profile" :class="{ 'active': props.pageState === 'myposts' }" @click="changePageState('myposts')"><img :src="ProfileIcon" /></button>
+            <button v-if="props.pageState != 'userposts'" class="post-component__nav-btn profile" :class="{ 'active': props.pageState === 'myposts' }" @click="changePageState('myposts')"><img :src="ProfileIcon" /></button>
+            <button v-else class="post-component__nav-btn profile" @click="changePageState('posts')"><img :src="BackIcon" /></button>
         </div>
         <div class="nav-btn__text">
-            <span class="nav-btn__text-item" :class="{ 'active': props.pageState === 'posts' }">Posts</span>
-            <span class="nav-btn__text-item" :class="{ 'active': props.pageState === 'create' }">Write</span> 
-            <span class="nav-btn__text-item" :class="{ 'active': props.pageState === 'myposts' }">Profile</span>
+            <span  v-if="props.pageState != 'userposts'" class="nav-btn__text-item" :class="{ 'active': props.pageState === 'posts' }">Posts</span>
+            <span  v-if="props.pageState != 'userposts'" class="nav-btn__text-item" :class="{ 'active': props.pageState === 'create' }">Write</span> 
+            <span  v-if="props.pageState != 'userposts'" class="nav-btn__text-item" :class="{ 'active': props.pageState === 'myposts' }">Profile</span>
+            <span v-else="props.pageState != 'visible'" class="nav-btn__text-item">Back</span>
         </div>
     </div>
 </template>
