@@ -181,6 +181,19 @@ const createNewPost = () => {
         useWebAppPopup().showAlert("Недостаточно 🍆 для создания поста");
         return;
     }
+
+    if(newPosts.value.type != 'vote'){
+        if(newPosts.value.price <= 0) {
+            useWebAppPopup().showAlert("Стоимость открытия поста не может быть 0 🍆");
+            return;
+        }
+    } else {
+        if(newPosts.value.votePrice < 10) {
+            useWebAppPopup().showAlert("Стоимость голосования поста не может быть меньше 10 🍆");
+            return;
+        }
+    }
+
     newPosts.value.isPrivate = isPostOptionsSet.value;
     if (newPosts.value.image != null) {
         const newPost = {
