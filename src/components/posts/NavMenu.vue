@@ -4,8 +4,12 @@
     import ProfileIcon from "@/assets/images/profile-icon.svg";
     import BackIcon from "@/assets/images/back-icon.svg"
 
+    import { ref } from 'vue';
+import { isFloat32Array } from "util/types";
+
     const props = defineProps<{
         pageState: string;
+        onFilterPostsBy: Function;
     }>();
 
     const emit = defineEmits(['change-page-state']);
@@ -14,10 +18,37 @@
         if (state === props.pageState) return;
         emit('change-page-state', state);
     };
+
+    const isFilterOpened = ref(false);
+
+    const onUseFilter = (filterType: string) => {
+        props.onFilterPostsBy(filterType);
+        isFilterOpened.value = false;
+    }
+
 </script>
 
 <template>
     <div class="navMenu">
+        <div v-if="props.pageState == 'posts'" :style="{ width:'100%', display:'flex', justifyContent:'flex-end'}">
+            <div class="nav-btn__wrapper" :style="{ marginRight:'30px', display:'flex', flexDirection:'column', gap:'25px'}">
+                <div v-if="isFilterOpened">
+                    <button class="post-component__nav-btn feed" :style="{ display:'flex', justifyContent:'center', alignItems:'center'}" @click="onUseFilter('coin')">
+                        <span :style="{ fontSize:'20px' }">💎</span>
+                    </button>
+                </div>
+                <div v-if="isFilterOpened">
+                    <button class="post-component__nav-btn feed" :style="{ display:'flex', justifyContent:'center', alignItems:'center'}" @click="onUseFilter('date')">
+                        <span :style="{ fontSize:'20px' }">🗓️</span>
+                    </button>
+                </div>
+                <div>
+                    <button class="post-component__nav-btn feed" :style="{ display:'flex', justifyContent:'center', alignItems:'center'}" @click="()=>{isFilterOpened = !isFilterOpened}">
+                        <span :style="{ fontSize:'20px' }">🔎</span>
+                    </button>
+                </div>
+            </div>
+        </div>  
         <div class="nav-btn__wrapper">
             <button v-if="props.pageState != 'userposts'" class="post-component__nav-btn feed" :class="{ 'active': props.pageState === 'posts' }" @click="changePageState('posts')">
                 <img :src="FeedIcon" />
@@ -49,6 +80,18 @@
     align-items: center;
     justify-content: flex-end;
     z-index: 10;
+}
+
+.nav-filter-btn__wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    background: #392936;
+    padding: 16px;
+    align-self: center;
+    border-radius: 40px;
+    box-shadow: inset 0 0 0px 1px #4d3749;
 }
 
 .navMenu .nav-btn__wrapper {

@@ -77,6 +77,7 @@ export interface allPosts {
     VotePrice: number;
     VoteYes: number;
     VoteNo: number;
+    CreatedAt: Date | null;
 }
 
 export interface boughtPosts {

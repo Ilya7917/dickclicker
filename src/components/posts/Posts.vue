@@ -13,9 +13,13 @@ userStore.getBoosts()
 const isPopupVisible = ref(false);
 const justOpened = ref(false);
 
+const host = import.meta.env.VITE_API_HOST;
+
 const pageState = ref("posts");
 
 const isPostOptionsSet = ref(false);
+
+const filteredPostBy = ref("");
 
 const isNextButton = ref(false);
 const newPosts = ref({
@@ -177,13 +181,14 @@ const nextButtonChangeState = () => {
 const uploadPostState = ref(false);
 const createNewPost = () => {
     if(!userStore.user) return;
+    
     if(userStore.user.balance < 1000) {
         useWebAppPopup().showAlert("Недостаточно 🍆 для создания поста");
         return;
     }
-
+    
     if(newPosts.value.type != 'vote'){
-        if(newPosts.value.price <= 0) {
+        if(newPosts.value.price <= 0 && newPosts.value.isPrivate) {
             useWebAppPopup().showAlert("Стоимость открытия поста не может быть 0 🍆");
             return;
         }
@@ -443,16 +448,27 @@ const showUserPosts = (userId: number) => {
     } else {
         userPosts.value = [];
     }
-
-    
-
 }
+
+const onFilterPostsBy = (type: string) => {
+    if(userStore.posts == null) return;
+    switch(type){
+        case "coin":
+            fetchUserData();
+            break;
+        case "date":
+            userStore.posts = userStore.posts.filter(post => post.CreatedAt !== null)
+            .filter(post => post.CreatedAt && new Date(post.CreatedAt).toString() !== 'Invalid Date')
+            .sort((a, b) => new Date(b.CreatedAt || new Date()).getTime() - new Date(a.CreatedAt || new Date()).getTime());
+            break;
+    }
+} 
 
 </script>
 
 <template>
     <div class="Bg"></div>
-    <NavMenu :page-state="pageState" @change-page-state="handleChangePageState" />
+    <NavMenu :page-state="pageState" @change-page-state="handleChangePageState" :onFilterPostsBy="onFilterPostsBy" />
     <div v-if="pageState === 'create'" class="createPostMenu">
         <div>
             <ul id="progressbar">
@@ -519,11 +535,11 @@ const showUserPosts = (userId: number) => {
         <div v-for="(post, index) in userStore.posts" :key="post.ID" :style="{ width: '100%' }">
                 <div class="post">
                     <div class="ownerData">
-                        <img :src="post.AvatarURL" @click="showUserPosts(post.OwnerID)"/>
+                        <img :src="post.AvatarURL.includes('uploads') ?  `${host}/${post.AvatarURL}` : post.AvatarURL" @click="showUserPosts(post.OwnerID)"/>
                         <span @click="showUserPosts(post.OwnerID)">{{ post.OwnerName }}</span>
                     </div>
                     <div class="postImage" :style="{  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >
-                        <img :src="post.ImagePath" :style="{ maxWidth: '100%', height: 'auto', width:'100%'}" />
+                        <img :src="post.ImagePath.includes('uploads') ? `${host}/${post.ImagePath}` : post.ImagePath" :style="{ maxWidth: '100%', height: 'auto', width:'100%'}" />
                     </div>
                     <div class="postDescription">
                         <span>{{ post.Description }}</span>
@@ -564,11 +580,11 @@ const showUserPosts = (userId: number) => {
         <div v-for="(post, index) in userPosts" :key="post.ID" :style="{ width: '100%' }">
                 <div class="post">
                     <div class="ownerData">
-                        <img :src="post.AvatarURL"/>
+                        <img :src="post.AvatarURL.includes('uploads') ?  `${host}/${post.AvatarURL}` : post.AvatarURL" />
                         <span>{{ post.OwnerName }}</span>
                     </div>
                     <div class="postImage" :style="{  filter: checkIfItMyPost(post.OwnerID, post.ID) ? 'blur(25px)' : 'blur(0px)'}" >
-                        <img :src="post.ImagePath" :style="{ maxWidth: '100%', height: 'auto', width:'100%'}" />
+                        <img :src="post.ImagePath.includes('uploads') ? `${host}/${post.ImagePath}` : post.ImagePath" :style="{ maxWidth: '100%', height: 'auto', width:'100%'}" />
                     </div>
                     <div class="postDescription">
                         <span>{{ post.Description }}</span>
