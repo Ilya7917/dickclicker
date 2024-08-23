@@ -63,6 +63,47 @@ const filterPosts = (array: allPosts[]): allPosts[] => {
     return [...nonVotePosts, ...votePosts]
 }
 
+async function fetchPostData() {
+    try {
+        await Promise.all([
+            userStore.getMyBoughtPosts(),
+            userStore.getPosts().then(ok => {
+                if(ok) {
+                    if(userStore.posts == null) return;
+                    
+                    let myFilteredPosts = filterPosts(userStore.posts);
+                    
+                    userStore.posts = myFilteredPosts;
+
+                    const donatePosts: allPosts[] = userStore.posts.filter(post => post.Type === 'donate');
+                    const votePosts: allPosts[] = userStore.posts.filter(post => post.Type === 'vote');
+
+                    const result: allPosts[] = [];
+                    while (donatePosts.length > 0 || votePosts.length > 0) {
+                        if (donatePosts.length > 0) {
+                            const post = donatePosts.shift();
+                            if (post !== undefined) { 
+                                result.push(post);
+                            }
+                        }
+                        if (votePosts.length > 0) {
+                            const post = votePosts.shift();
+                            if (post !== undefined) {  
+                                result.push(post);
+                            }
+                        }
+                    }
+                    userStore.posts = result;
+
+                }
+            }),
+            userStore.getMyPosts(),
+        ]);
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    }
+}
+
 async function fetchUserData() {
     try {
         await Promise.all([
@@ -93,6 +134,9 @@ async function fetchUserData() {
                             }
                         }
                     }
+                    result.filter(post => post.CreatedAt !== null)
+                    .filter(post => post.CreatedAt && new Date(post.CreatedAt).toString() !== 'Invalid Date')
+                    .sort((a, b) => new Date(b.CreatedAt || new Date()).getTime() - new Date(a.CreatedAt || new Date()).getTime());
                     userStore.posts = result;
 
                 }
