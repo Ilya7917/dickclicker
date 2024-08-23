@@ -134,11 +134,10 @@ async function fetchUserData() {
                             }
                         }
                     }
-                    result.filter(post => post.CreatedAt !== null)
-                    .filter(post => post.CreatedAt && new Date(post.CreatedAt).toString() !== 'Invalid Date')
-                    .sort((a, b) => new Date(b.CreatedAt || new Date()).getTime() - new Date(a.CreatedAt || new Date()).getTime());
                     userStore.posts = result;
-
+                    userStore.posts = userStore.posts.filter(post => post.CreatedAt !== null)
+                        .filter(post => post.CreatedAt && new Date(post.CreatedAt).toString() !== 'Invalid Date')
+                        .sort((a, b) => new Date(b.CreatedAt || new Date()).getTime() - new Date(a.CreatedAt || new Date()).getTime());
                 }
             }),
             userStore.getMyPosts(),
@@ -498,7 +497,7 @@ const onFilterPostsBy = (type: string) => {
     if(userStore.posts == null) return;
     switch(type){
         case "coin":
-            fetchUserData();
+            fetchPostData();
             break;
         case "date":
             userStore.posts = userStore.posts.filter(post => post.CreatedAt !== null)
