@@ -26,7 +26,7 @@ const newPosts = ref({
     image: null as File | null,
     isPrivate: false,
     description: '',
-    type: '',
+    type: 'vote',
     price: 0,
     votePrice: 0
 })
@@ -526,7 +526,7 @@ const onFilterPostsBy = (type: string) => {
                     <input class="dropdown" type="checkbox" id="dropdown" name="dropdown"/>
                     <label class="for-dropdown" for="dropdown">{{ newPosts.type == '' ? 'Выберите тип поста' : getPostTypeText(newPosts.type) }}</label>
                     <div class="section-dropdown"> 
-                        <a @click="setPostType('donate')">Донатный <i class="uil uil-arrow-right">💸</i></a>
+                        <!-- <a @click="setPostType('donate')">Донатный <i class="uil uil-arrow-right">💸</i></a> -->
                         <a @click="setPostType('vote')">Голосование  <i class="uil uil-arrow-right">🗳️</i></a>
                     </div>
                 </div>
