@@ -10,7 +10,7 @@
         <div v-else class="initials">{{ leaderboard?.me?.identity?.substring(0, 2).toUpperCase() }}
         </div>
       </span>
-      <div v-if="leaderBoardTitle == 'top.balance'" class="player-info">
+      <div v-if="leaderBoardTitle == 'top.topBalance'" class="player-info">
         <span class="name">{{ t("top.yourPlace", {"place": leaderboard?.me?.position}) }}</span>
         <span class="player-score">🍆 {{ balance.toLocaleString() }}</span>
       </div>

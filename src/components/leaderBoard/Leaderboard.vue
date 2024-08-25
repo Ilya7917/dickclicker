@@ -42,10 +42,10 @@ const setActiveTab = (tabName: string) => {
     <leaderboardItem v-if="leaderboardStore.dailyLeaderboard" :leaderboard="leaderboardStore.dailyLeaderboard" :balance="user?.balance || 0" leader-board-title="top.topToday" />
   </div>
   <div class="leaderboard" v-if="activeTab === 'Month'">
-    <leaderboardItem v-if="leaderboardStore.monthlyLeaderboard" :leaderboard="leaderboardStore.monthlyLeaderboard" :balance="user?.balance || 0" leader-board-title="top.month" />
+    <leaderboardItem v-if="leaderboardStore.monthlyLeaderboard" :leaderboard="leaderboardStore.monthlyLeaderboard" :balance="user?.balance || 0" leader-board-title="top.topMonth" />
   </div>
   <div class="leaderboard" v-if="activeTab === 'Balance'">
-    <leaderboardItem v-if="leaderboardStore.monthlyLeaderboard" :leaderboard="leaderboardStore.monthlyLeaderboard" :balance="user?.balance || 0" leader-board-title="top.balance" />
+    <leaderboardItem v-if="leaderboardStore.monthlyLeaderboard" :leaderboard="leaderboardStore.monthlyLeaderboard" :balance="user?.balance || 0" leader-board-title="top.topBalance" />
   </div>
 </template>
 
