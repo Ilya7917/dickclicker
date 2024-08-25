@@ -6,7 +6,7 @@ const routes = [
         path: '/', name: 'miner', component: () => import('@/components/Miner.vue')
     },
     {
-        path: '/leaderboard', name: 'leaderboard', component: () => import('@/components/Leaderboard.vue')
+        path: '/leaderboard', name: 'leaderboard', component: () => import('@/components/leaderBoard/Leaderboard.vue')
     },
     {
         path: '/skins', name: 'skins', component: () => import('@/components/skins/SkinsStore.vue')
