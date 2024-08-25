@@ -120,7 +120,8 @@ const setActiveTab = (tabName: string) => {
         </div>
       </div>
       <div v-for="(player, index) in leaderboardStore.leaderboard?.players" :key="player.id" class="player">
-        <span class="rank">{{ index + 1 }}.</span>
+        <span v-if="index != 0" class="rank">{{ index + 1 }}.</span>
+        <span v-else>👑</span>
         <span class="avatar">
           <img v-if="player.avatar_url" :src="player.avatar_url" :alt="player.identity" />
           <div v-else class="initials">{{ player.identity.substring(0, 2).toUpperCase() }}</div>
