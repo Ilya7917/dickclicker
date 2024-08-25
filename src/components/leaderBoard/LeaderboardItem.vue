@@ -29,7 +29,7 @@
       <div class="player-info">
         <span v-if="player.is_premium" class="name">{{ player.identity }}</span>
         <span v-else>{{ player.identity }}</span>
-        <span class="player-score">🍆 {{ leaderBoardTitle != 'top.balance' ? '+' : '' }} {{ player.score.toLocaleString() }}</span>
+        <span class="player-score">🍆 {{ leaderBoardTitle != 'top.topBalance' ? '+' : '' }} {{ player.score.toLocaleString() }}</span>
       </div>
     </div>
   </div>
